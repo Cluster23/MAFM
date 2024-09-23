@@ -9,6 +9,7 @@ readme = "README.md"
 python = ">=3.8, <3.13"
 pyautogen = "^0.3.0"
 openai = "^1.47.0"
+sentence-transformers = "^3.1.1"
 
 
 [build-system]
