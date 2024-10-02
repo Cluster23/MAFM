@@ -1,10 +1,15 @@
 import sqlite3
+import os
 
 # sqlite는 서버 기반 데이터베이스가 아니다.
 # 서버 기반 데이터 베이스(MySQL, PostgreSQL)와는 다르게, 서버가 없는 내장형 데이터베이스이다.
 # 데이터베이스 파일은 하나의 독립적인 파일로 구성된다.
 
 def initialize_database(db_name='filesystem.db'):
+    # 기존에 db가 존재하면 날림
+    if os.path.exists(db_name):
+        os.remove(db_name)
+
     # 데이터베이스 파일에 연결
     connection = sqlite3.connect('filesystem.db')
 
@@ -19,7 +24,7 @@ def initialize_database(db_name='filesystem.db'):
             record_id INTEGER PRIMARY KEY AUTOINCREMENT,
             id TEXT NOT NULL,
             file_path TEXT NOT NULL,
-            is_dir BOOLEAN NOT NULL
+            is_dir INTEGER NOT NULL
         )
     ''')
 
@@ -87,12 +92,33 @@ def update_file_info(record_id, new_file_path, db_name='filesystem.db'):
     connection.commit()
     connection.close()
 
+def update_directory_structure(record_id, new_dir_path, db_name='filesystem.db'):
+    connection = sqlite3.connect(db_name)
+    cursor = connection.cursor()
+    cursor.execute('''
+        UPDATE file_info
+        SET dir_path = ?
+        WHERE record_id = ?
+    ''', (new_dir_path, record_id))
+    connection.commit()
+    connection.close()
+
 # DELETE 함수 - 데이터 삭제
 def delete_file_info(record_id, db_name='filesystem.db'):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
     cursor.execute('''
         DELETE FROM file_info
+        WHERE record_id = ?
+    ''', (record_id,))
+    connection.commit()
+    connection.close()
+
+def delete_directory_structure(record_id, db_name='filesystem.db'):
+    connection = sqlite3.connect(db_name)
+    cursor = connection.cursor()
+    cursor.execute('''
+        DELETE FROM directory_structure
         WHERE record_id = ?
     ''', (record_id,))
     connection.commit()

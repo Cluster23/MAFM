@@ -56,3 +56,4 @@ def get_all_file_data(directory):
             idx += 1
         files.append(data_list)
     return files
+
