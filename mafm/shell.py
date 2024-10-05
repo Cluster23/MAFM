@@ -14,6 +14,11 @@ from sqlite import (
     delete_file_info,
     delete_directory_structure,
 )
+from vectorDb import (
+    initialize_vector_db,
+    save,
+    search,
+)
 
 link_dir = None
 
@@ -55,7 +60,7 @@ def execute_command(command):
                 root = cmd_parts[1]
 
                 # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
-                # start_command_python(root)
+                start_command_python(root)
                 # start_command_c(root)
                 # get_file_data(root)
             except IndexError:
@@ -80,23 +85,58 @@ def start_command_python(root):
     initialize_database("filesystem.db")
 
     id = 1
+
+    # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
+    initialize_vector_db(root + ".db")
+
+    print(root)
+    insert_file_info(id, root, 1, "filesystem.db")
+
+    # 루트의 부모 디렉토리 찾기
+    last_slash_index = root.rfind('/')
+    if last_slash_index != -1:
+        root_parent = root[:last_slash_index]
+
+    insert_directory_structure(id, root, root_parent, "filesystem.db")
+    id += 1
+
     # 디렉터리 재귀 탐색
     for dirpath, dirnames, filenames in os.walk(root):
         # 디렉터리 정보 삽입
         for dirname in dirnames:
             full_path = os.path.join(dirpath, dirname)
-            # ToDo id값 해결해야됨
+
+            # 디렉토리 하나당 하나의 Vector DB 생성
+            initialize_vector_db(full_path + ".db")
+
             print(full_path)
-            insert_file_info(id,full_path,1,"filesystem.db")
-            insert_directory_structure(id,full_path,dirpath,"filesystem.db")
+            insert_file_info(id, full_path, 1, "filesystem.db")
+            insert_directory_structure(id, full_path, dirpath, "filesystem.db")
             id += 1
 
-        # 파일 정보 삽입
+        # 파일 정보 삽입 및 벡터 DB에 저장
         for filename in filenames:
             full_path = os.path.join(dirpath, filename)
             print(full_path)
-            # ToDo id값 해결해야됨
+
+            # 파일 정보 삽입
             insert_file_info(id, full_path, 0, "filesystem.db")
+
+            # 파일 내용을 읽어서 처리
+            try:
+                file_data = get_file_data(full_path)  # get_file_data 함수 사용
+                if not file_data:
+                    raise Exception(f"Failed to read file data for {full_path}")
+
+                # 파일 내용 중에서 조각들만 추출 (data[2], data[3], ...)
+                file_chunks = file_data[2:]  # 파일 조각 리스트 (마지막 None 이전까지)
+
+                # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+                save(os.path.join(dirpath, "demo_collection.db"), file_chunks)
+
+            except Exception as e:
+                print(f"Error reading file {full_path}: {e}")
+
             id += 1
 
     # 종료 시간 기록

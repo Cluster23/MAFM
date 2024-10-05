@@ -123,3 +123,50 @@ def delete_directory_structure(record_id, db_name='filesystem.db'):
     ''', (record_id,))
     connection.commit()
     connection.close()
+
+
+def get_directories_by_depth(db_name, depth):
+    try:
+        # 데이터베이스 연결
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # 루트 경로 가져오기 (항상 첫 번째 레코드가 루트)
+        cursor.execute("SELECT dir_path FROM directory_structure WHERE id = 1")
+        root_path = cursor.fetchone()
+        if not root_path:
+            raise ValueError("Root path not found in the database")
+
+        root_path = root_path[0]
+        root_depth = root_path.count('/')
+
+        # 지정된 깊이 이하의 경로들을 가져오는 쿼리 작성
+        cursor.execute("SELECT dir_path FROM directory_structure")
+        rows = cursor.fetchall()
+
+        directories = []
+        for row in rows:
+            current_path = row[0]
+            current_depth = current_path.count('/') - root_depth
+
+            # 지정된 깊이 이하인 경우에만 추가
+            if current_depth <= depth:
+                directories.append(current_path)
+
+        return directories
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return []
+
+    finally:
+        # 데이터베이스 연결 종료
+        if conn:
+            conn.close()
+
+
+# 사용 예시
+db_name = "filesystem.db"
+depth = 0
+directories = get_directories_by_depth(db_name, depth)
+print(f"Directories with depth <= {depth}:", directories)
