@@ -57,3 +57,4 @@ def get_all_file_data(directory):
         files.append(data_list)
     return files
 
+# get_file_data("/Users/Ruffles/Downloads/MAFM_test/text9.txt")

@@ -82,12 +82,20 @@ def start_command_python(root):
     start_time = time.time()
 
     # SQLite DB 연결 및 초기화
-    initialize_database("filesystem.db")
+    try:
+        initialize_database("filesystem.db")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        return
 
     id = 1
 
     # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
-    initialize_vector_db(root + ".db")
+    try:
+        initialize_vector_db(root + ".db")
+    except Exception as e:
+        print(f"Error initializing vector DB for root: {e}")
+        return
 
     print(root)
     insert_file_info(id, root, 1, "filesystem.db")
@@ -106,8 +114,11 @@ def start_command_python(root):
         for dirname in dirnames:
             full_path = os.path.join(dirpath, dirname)
 
-            # 디렉토리 하나당 하나의 Vector DB 생성
-            initialize_vector_db(full_path + ".db")
+            try:
+                initialize_vector_db(full_path + ".db")
+            except Exception as e:
+                print(f"Error initializing vector DB for directory: {e}")
+                continue
 
             print(full_path)
             insert_file_info(id, full_path, 1, "filesystem.db")
@@ -116,6 +127,10 @@ def start_command_python(root):
 
         # 파일 정보 삽입 및 벡터 DB에 저장
         for filename in filenames:
+            # 비밀 파일(파일 이름이 .으로 시작)과 .db 파일 제외
+            if filename.startswith(".") or filename.endswith(".db"):
+                continue
+
             full_path = os.path.join(dirpath, filename)
             print(full_path)
 
@@ -125,6 +140,8 @@ def start_command_python(root):
             # 파일 내용을 읽어서 처리
             try:
                 file_data = get_file_data(full_path)  # get_file_data 함수 사용
+                # file_data 자체가 이미 500Bytes 씩 잘려져 있음
+                # file_data[2 ~ 사이즈 / 500]까지 존재
                 if not file_data:
                     raise Exception(f"Failed to read file data for {full_path}")
 
@@ -132,7 +149,7 @@ def start_command_python(root):
                 file_chunks = file_data[2:]  # 파일 조각 리스트 (마지막 None 이전까지)
 
                 # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
-                save(os.path.join(dirpath, "demo_collection.db"), file_chunks)
+                save(dirpath + ".db", id, file_chunks)
 
             except Exception as e:
                 print(f"Error reading file {full_path}: {e}")

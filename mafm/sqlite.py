@@ -163,10 +163,3 @@ def get_directories_by_depth(db_name, depth):
         # 데이터베이스 연결 종료
         if conn:
             conn.close()
-
-
-# 사용 예시
-db_name = "filesystem.db"
-depth = 0
-directories = get_directories_by_depth(db_name, depth)
-print(f"Directories with depth <= {depth}:", directories)

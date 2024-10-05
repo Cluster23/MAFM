@@ -48,69 +48,156 @@ char *get_filename(const char *path) {
  * 마지막 data[idx + 1]: NULL 포인터 (배열의 끝을 알리기 위해)
 */
 char** get_file_data(const char* path) {
+    // 파일을 읽기 모드로 엽니다.
     FILE *file = fopen(path, "rb");
     if (!file) {
-        return NULL;
+        perror("Failed to open file"); // 파일 열기 실패 시 오류 메시지 출력
+        return NULL; // 실패 시 NULL 반환
     }
 
+    // 파일 이름을 가져옵니다.
     char *fname = get_filename(path);
-    int is_image_or_video_flag = is_image_or_video(path);
-    
-    if (is_image_or_video_flag) {
-        char **data = malloc(sizeof(char *) * 3);
-        data[0] = strdup(path);
-        data[1] = fname;
-        data[2] = NULL;
-        fclose(file);
-        return data;
+    if (!fname) {
+        perror("Failed to get filename"); // 파일 이름을 가져오는 데 실패하면 오류 메시지 출력
+        fclose(file); // 파일 닫기
+        return NULL; // 실패 시 NULL 반환
     }
 
-    int maxChunks = 4;
-    char **data = (char **)malloc(sizeof(char *) * (maxChunks));
+    // 파일이 이미지 또는 비디오인지 확인합니다.
+    int is_image_or_video_flag = is_image_or_video(path);
 
-    data[0] = strdup(path); 
-    data[1] = fname;
-    
-    int idx = 2;
-    int chunkSize = 500;
+    // 이미지 또는 비디오 파일일 경우
+    if (is_image_or_video_flag) {
+        char **data = malloc(sizeof(char *) * 3); // data 배열에 3개의 포인터 공간을 할당합니다.
+        if (!data) {
+            perror("Failed to allocate memory for data array"); // 메모리 할당 실패 시 오류 메시지 출력
+            free(fname); // 파일 이름 메모리 해제
+            fclose(file); // 파일 닫기
+            return NULL; // 실패 시 NULL 반환
+        }
+        data[0] = strdup(path); // 경로 복사
+        if (!data[0]) {
+            perror("Failed to duplicate path"); // 경로 복사 실패 시 오류 메시지 출력
+            free(data); // data 배열 해제
+            free(fname); // 파일 이름 해제
+            fclose(file); // 파일 닫기
+            return NULL; // 실패 시 NULL 반환
+        }
+        data[1] = fname; // 파일 이름 저장
+        data[2] = NULL; // 마지막에 NULL 포인터 설정 (배열의 끝을 알리기 위해)
+        fclose(file); // 파일 닫기
+        return data; // data 배열 반환
+    }
+
+    // 일반 파일일 경우, 초기 배열 크기를 설정합니다.
+    int maxChunks = 4;
+    char **data = (char **)malloc(sizeof(char *) * maxChunks); // 초기 크기 4로 data 배열 할당
+    if (!data) {
+        perror("Failed to allocate memory for data array"); // 메모리 할당 실패 시 오류 메시지 출력
+        free(fname); // 파일 이름 해제
+        fclose(file); // 파일 닫기
+        return NULL; // 실패 시 NULL 반환
+    }
+
+    data[0] = strdup(path); // 파일 경로 복사
+    if (!data[0]) {
+        perror("Failed to duplicate path"); // 파일 경로 복사 실패 시 오류 메시지 출력
+        free(data); // data 배열 해제
+        free(fname); // 파일 이름 해제
+        fclose(file); // 파일 닫기
+        return NULL; // 실패 시 NULL 반환
+    }
+
+    data[1] = fname; // 파일 이름 저장
+
+    int idx = 2; // 데이터 조각을 저장할 인덱스 시작 (0과 1은 경로와 이름)
+    int chunkSize = 500; // 각 조각의 크기 (500바이트)
     int bytesRead;
 
+    // 파일 내용을 500바이트씩 읽습니다.
     while (1) {
         if (idx >= maxChunks) {
+            // 현재 배열의 크기가 부족할 경우 크기를 2배로 늘립니다.
             maxChunks *= 2;
-            data = (char **)realloc(data, maxChunks * sizeof(char *));
-            if (data == NULL) {
-                perror("Failed to reallocate memory for data array");
+            char **temp = realloc(data, maxChunks * sizeof(char *));
+            if (temp == NULL) {
+                perror("Failed to reallocate memory for data array"); // 메모리 재할당 실패 시 오류 메시지 출력
+                // 이미 할당된 메모리 해제
+                for (int i = 0; i < idx; i++) {
+                    free(data[i]);
+                }
+                free(data);
                 fclose(file);
-                return NULL;
+                return NULL; // 실패 시 NULL 반환
             }
+            data = temp; // 재할당된 메모리 주소로 업데이트
         }
 
+        // 새로운 조각을 위한 메모리 할당
         data[idx] = (char *)malloc(chunkSize * sizeof(char));
         if (data[idx] == NULL) {
-            perror("Failed to allocate memory for chunk");
+            perror("Failed to allocate memory for chunk"); // 메모리 할당 실패 시 오류 메시지 출력
+            // 이미 할당된 메모리 해제
+            for (int i = 0; i < idx; i++) {
+                free(data[i]);
+            }
+            free(data);
             fclose(file);
-            return NULL;
+            return NULL; // 실패 시 NULL 반환
         }
 
+        // 파일에서 chunkSize만큼 읽기
         bytesRead = fread(data[idx], 1, chunkSize, file);
         if (bytesRead > 0) {
+            if (bytesRead < chunkSize) {
+                // 만약 읽은 바이트가 chunkSize보다 적다면 메모리 크기 조정
+                char *adjusted = realloc(data[idx], bytesRead);
+                if (adjusted) {
+                    data[idx] = adjusted;
+                }
+            }
             idx++;
         }
         if (bytesRead < chunkSize) {
             if (feof(file)) {
-                break;
+                break; // 파일 끝에 도달하면 종료
             } else if (ferror(file)) {
-                perror("Error reading file");
+                perror("Error reading file"); // 파일 읽기 중 오류 발생 시 메시지 출력
+                // 이미 할당된 메모리 해제
+                for (int i = 0; i <= idx; i++) {
+                    free(data[i]);
+                }
+                free(data);
                 fclose(file);
-                return NULL;
+                return NULL; // 실패 시 NULL 반환
             }
         }
     }
-    data[idx + 1] = NULL;
-    fclose(file);
-    return data;
+
+    // 마지막에 NULL 포인터 설정 (배열의 끝을 알리기 위해)
+    if (idx < maxChunks) {
+        data[idx] = NULL;
+    } else {
+        // 추가 공간이 필요하면 재할당하여 NULL 포인터 추가
+        char **temp = realloc(data, (idx + 1) * sizeof(char *));
+        if (temp == NULL) {
+            perror("Failed to reallocate memory for terminating NULL pointer"); // 메모리 재할당 실패 시 오류 메시지 출력
+            // 이미 할당된 메모리 해제
+            for (int i = 0; i < idx; i++) {
+                free(data[i]);
+            }
+            free(data);
+            fclose(file);
+            return NULL; // 실패 시 NULL 반환
+        }
+        data = temp;
+        data[idx] = NULL;
+    }
+
+    fclose(file); // 파일 닫기
+    return data; // 파일 정보와 조각들을 포함한 data 배열 반환
 }
+
 
 
 // collect_file_data_recursive: 지정된 디렉터리를 재귀적으로 탐색하며 파일 데이터를 수집
@@ -167,5 +254,3 @@ char*** get_all_file_data(const char* dir_path, int* num_files) {
     collect_file_data_recursive(dir_path, num_files, &file_data_array, 1);
     return file_data_array;
 }
-
-
