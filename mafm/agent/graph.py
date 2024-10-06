@@ -4,7 +4,7 @@ from typing import Sequence, TypedDict, Annotated
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, StateGraph, START
-from agents import agent_node, supervisor_agent, analyst_agent
+from .agents import agent_node, supervisor_agent, analyst_agent
 from rag.sqlite import get_directories_by_depth
 
 

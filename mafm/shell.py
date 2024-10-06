@@ -20,12 +20,20 @@ from rag.vectorDb import (
     search,
 )
 from rag.embedding import initialize_model
+from agent.graph import graph
 
 link_dir = None
 
 
 def execute_command(command):
     global link_dir
+
+    # temp_dir_path 지정
+    temp_dir_path = os.path.join(os.getcwd(), "temp")
+
+    # temp 디렉토리가 없으면 생성
+    if not os.path.exists(temp_dir_path):
+        os.makedirs(temp_dir_path)
 
     try:
         cmd_parts = command.strip().split()
@@ -44,6 +52,27 @@ def execute_command(command):
             os.chdir(temp_dir.name)
             link_dir = temp_dir
             return
+
+        elif cmd_parts[0] == "mlink":
+            if len(cmd_parts) < 2:
+                print("mlink: missing arguments. Usage: mlink <dir_path>")
+                return
+
+            directory_path = cmd_parts[1]
+            paths = graph(directory_path)
+
+            # 임시 디렉토리 생성
+            temp_dir = tempfile.TemporaryDirectory(dir=temp_dir_path)
+
+            # 소프트 링크 생성
+            result = make_soft_links(paths, temp_dir)
+            print(f"Soft links created: {result}")
+
+            # 디렉토리 변경 및 링크 디렉토리 갱신
+            os.chdir(temp_dir.name)
+            link_dir = temp_dir
+            return
+
         elif cmd_parts[0] == "cd":
             try:
                 if cmd_parts[1] == "~":
@@ -200,7 +229,7 @@ def shell():
     # root 위치에서부터 MAFM을 활성화
     # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
     try:
-        root = "/Users/Ruffles/Downloads/MAFM_test"
+        root = "/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test"
 
         # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
         start_command_python(root)

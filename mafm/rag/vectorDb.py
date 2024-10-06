@@ -53,7 +53,6 @@ def save(db_name, id, queries):
         return
 
     client = client_cache[db_name]
-    print("client 사용 시작")
 
     # 컬렉션이 존재하는지 확인
     if not client.has_collection(collection_name="demo_collection"):
@@ -73,6 +72,7 @@ def save(db_name, id, queries):
         # 데이터 삽입
         res = client.insert(collection_name="demo_collection", data=data)
         print(res)
+        print()
 
         # 임베딩 값 삭제 후 가비지 컬렉션 호출
         del query_embeddings
@@ -89,7 +89,7 @@ def save(db_name, id, queries):
         print(f"Error occurred during saving data to Milvus: {e}")
 
 
-def search(db_name, query):
+def search(db_name, query_list):
     global client_cache
 
     # 캐시에서 클라이언트를 가져옴
@@ -98,16 +98,13 @@ def search(db_name, query):
         return
 
     client = client_cache[db_name]
-    print("client 사용 시작")
 
     # 컬렉션이 존재하는지 확인
     if not client.has_collection(collection_name="demo_collection"):
         print(f"Collection 'demo_collection' does not exist in {db_name}")
         return
 
-    query_vectors = embedding(query)  # query_vectors는 2차원 배열이어야 함
-
-    print(query_vectors)
+    query_vectors = embedding(query_list)  # query_vectors는 2차원 배열이어야 함
 
     res = client.search(
         collection_name="demo_collection",
@@ -116,4 +113,6 @@ def search(db_name, query):
         output_fields=["word"],
     )
     return res
-    print(res)
+
+
+

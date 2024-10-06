@@ -129,6 +129,7 @@ def get_directories_by_depth(db_name, depth):
     try:
         # 데이터베이스 연결
         conn = sqlite3.connect(db_name)
+        print("get_directories_by_depth")
         cursor = conn.cursor()
 
         # 루트 경로 가져오기 (항상 첫 번째 레코드가 루트)
@@ -158,8 +159,3 @@ def get_directories_by_depth(db_name, depth):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return []
-
-    finally:
-        # 데이터베이스 연결 종료
-        if conn:
-            conn.close()

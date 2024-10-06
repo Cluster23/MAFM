@@ -38,7 +38,6 @@ def embedding(queries):
 
     try:
         # 쿼리 임베딩
-        log_memory_usage()
         if not isinstance(queries, list) or not all(isinstance(q, str) for q in queries):
             raise ValueError("The input to encode() must be a list of strings.")
         query_embeddings = model.encode(queries)
