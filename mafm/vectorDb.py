@@ -85,10 +85,20 @@ def save(db_name, id, queries):
 
 
 def search(db_name, query):
-    client = MilvusClient(db_name)  # 데이터베이스 이름을 사용하여 클라이언트 생성
+    global client_cache
 
+    # 캐시에서 클라이언트를 가져옴
+    if db_name not in client_cache:
+        print(f"Client for {db_name} does not exist.")
+        return
+
+    client = client_cache[db_name]
+    print("client 사용 시작")
+
+    # 컬렉션이 존재하는지 확인
     if not client.has_collection(collection_name="demo_collection"):
-        raise ValueError(f"Collection 'demo_collection' does not exist in {db_name}")
+        print(f"Collection 'demo_collection' does not exist in {db_name}")
+        return
 
     query_vectors = embedding(query)  # query_vectors는 2차원 배열이어야 함
 
@@ -102,12 +112,3 @@ def search(db_name, query):
     )
 
     print(res)
-
-import resource
-
-
-# initialize_vector_db("/Users/Ruffles/Downloads/MAFM_test/dir1.db")
-# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 1, ["Hello, world!", "How are you?"])
-# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 2, ["Hello, world!", "How are you?"])
-# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 3, ["Hello, world!", "How are you?"])
-# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 4, ["This is a really long query that is supposed to test how the system behaves with large inputs.", "How are you?"])
