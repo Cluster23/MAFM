@@ -1,5 +1,12 @@
-from pymilvus import MilvusClient, connections, Collection, FieldSchema, CollectionSchema, DataType
-from embedding import embedding, log_memory_usage
+from pymilvus import (
+    MilvusClient,
+    connections,
+    Collection,
+    FieldSchema,
+    CollectionSchema,
+    DataType,
+)
+from .embedding import embedding, log_memory_usage
 import gc
 
 # MilvusClient 전역 클라이언트 객체 생성
@@ -27,7 +34,7 @@ def initialize_vector_db(db_name):
 
         client.create_collection(
             collection_name="demo_collection",
-            dimension=1024, # stella는 1024
+            dimension=1024,  # stella는 1024
         )
 
         return client
@@ -57,13 +64,11 @@ def save(db_name, id, queries):
         # 쿼리 임베딩
         query_embeddings = embedding(queries)
 
-
         # 임베딩 데이터 저장
         data = [
             {"id": id, "vector": query_embeddings[i], "word": queries[i]}
             for i in range(len(query_embeddings))
         ]
-
 
         # 데이터 삽입
         res = client.insert(collection_name="demo_collection", data=data)
@@ -110,5 +115,5 @@ def search(db_name, query):
         limit=2,
         output_fields=["word"],
     )
-
+    return res
     print(res)

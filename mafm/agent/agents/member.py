@@ -1,5 +1,5 @@
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, List
 from .llm_model import api_key
 from .tools import get_file_list
@@ -8,54 +8,48 @@ from langgraph.store.base import BaseStore
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.utils.function_calling import convert_to_openai_function
 from langchain_core.messages import HumanMessage
+from rag.vectorDb import search
 
 
 class routeResponse(BaseModel):
-    messages: List[str]
-    next: Literal["supervisor"]
+    messages: List[str] = Field(description="list of file path")
 
 
-def agent_node(state, agent, directory_name):
+class queryResponse(BaseModel):
+    query: str = Field(description="query string")
+    directory_name: str = Field(description="directory name")
+
+
+def get_file_list(query: queryResponse) -> List[str]:
+    """
+    get file list from user input
+    """
+    print(query)
+    # return search(query.query, query.directory_name + ".db")
+    return ["A.txt", "B.txt", "C.txt"]
+
+
+def agent_node(state, directory_name: str, output_dict: List[str]):
+    llm = ChatOpenAI(
+        api_key=api_key,
+        model="gpt-4o-mini",
+        temperature=0,
+    )
     prompt = ChatPromptTemplate.from_messages(
         [
             MessagesPlaceholder(variable_name="messages"),
             (
                 "system",
-                "함수에 접근해서 디렉토리들을 골라주세요.",
+                "directory_name: {directory_name} "
+                "함수에 접근해서 파일 경로들을 리스트로 만들어주세요.",
             ),
         ]
+    ).partial(
+        directory_name=directory_name,
     )
-    result = agent.invoke(state)
-    return {
-        "messages": [
-            HumanMessage(content=result["messages"][-1].content, name=directory_name)
-        ]
-    }
-
-
-# def agent_node(state, agent_name: str):
-#     llm = ChatOpenAI(
-#         api_key=api_key,
-#         model="gpt-4o-mini",
-#         temperature=0,
-#     )
-
-#     function = convert_to_openai_function(get_file_list)
-
-#     # Prepare the prompt
-#     prompt = ChatPromptTemplate.from_messages(
-#         [
-#             MessagesPlaceholder(variable_name="messages"),
-#             (
-#                 "system",
-#                 "함수에 접근해서 디렉토리들을 골라주세요.",
-#             ),
-#         ]
-#     )
-
-#     chain = prompt | llm.with_structured_output(routeResponse)
-#     res = chain.invoke(state)
-
-#     print("RES", res, "\n\n\n\n")
-#     # store.put((agent_name), "restrict", res.messages)
-#     return res
+    query_chain = prompt | llm.with_structured_output(queryResponse)
+    chain = query_chain | get_file_list
+    res = chain.invoke(state)
+    output_dict.extend(res)
+    print("RES", res, "\n\n\n\n")
+    return {"messages": res}

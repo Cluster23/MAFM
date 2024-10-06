@@ -4,9 +4,8 @@ from typing import Sequence, TypedDict, Annotated
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, StateGraph, START
-from langgraph.prebuilt import create_react_agent
-from agents import agent_node, supervisor_agent, llm
-from tools import print_abc
+from agents import agent_node, supervisor_agent, analyst_agent
+from rag.sqlite import get_directories_by_depth
 
 
 class AgentState(TypedDict):
@@ -14,31 +13,61 @@ class AgentState(TypedDict):
     next: str
 
 
-members = ["Dir1", "Dir2", "Dir3"]
+def graph(directory_path: str):
+    human_input = HumanMessage(
+        content="한국어에 대해서 배우고 싶어 이전에 관련한 자료를 다운로드 받았던 것 같아"
+    )
 
-workflow = StateGraph(AgentState)
-workflow.add_node("supervisor", supervisor_agent)
-agents = {}
-for member in members:
-    agents[member] = create_react_agent(llm, tools=[print_abc])
-    research_node = functools.partial(agent_node, agent=agents[member], name=member)
-    workflow.add_node(member, agents[member])
-    workflow.add_edge(member, "supervisor")
+    members = get_directories_by_depth(
+        "/Users/parksehwan/Documents/MAFM/mafm/rag/filesystem.db", 1
+    )
+    output_dict = []
 
-conditional_map = {k: k for k in members}
-conditional_map["FINISH"] = END
-workflow.add_conditional_edges("supervisor", lambda x: x["next"], conditional_map)
-workflow.add_edge(START, "supervisor")
+    # graph 생성
+    workflow = StateGraph(AgentState)
+    supervisor_node = functools.partial(supervisor_agent, member_list=members)
+    workflow.add_node("supervisor", supervisor_node)
+    analyst_node = functools.partial(
+        analyst_agent, input_prompt=human_input.content, output_dict=output_dict
+    )
+    workflow.add_node("analyst", analyst_node)
+    for member in members:
+        member_node = functools.partial(
+            agent_node, directory_name=member, output_dict=output_dict
+        )
+        workflow.add_node(member, member_node)
+        workflow.add_edge(member, "supervisor")
+    conditional_map = {k: k for k in members}
+    conditional_map["analyst"] = "analyst"
+    workflow.add_conditional_edges("supervisor", lambda x: x["next"], conditional_map)
+    workflow.add_edge(START, "supervisor")
+    workflow.add_edge("analyst", END)
+    app = workflow.compile()
 
-graph = workflow.compile()
+    # from IPython.display import Image, display
+    # png_data = app.get_graph().draw_mermaid_png()
+    # with open("graph_image.png", "wb") as file:
+    #     file.write(png_data)
+    previous_output = None
+    for s in app.stream(
+        {"messages": [human_input]},
+        {"recursion_limit": 10},
+    ):
+        previous_output = s
+        if "__end__" not in s:
+            print(s)
+            print("----")
+    return previous_output["analyst"]["messages"]
 
-for s in graph.stream(
-    {
-        "messages": [
-            HumanMessage(content="Code hello world and print it to the terminal")
-        ]
-    }
-):
-    if "__end__" not in s:
-        print(s)
-        print("----")
+
+# def graph():
+#     for output in app.stream(human_input, stream_mode="updates"):
+#         for key, value in output.items():
+#             print(f"Output from node '{key}':")
+#             print("---")
+#             print(value["messages"][-1].pretty_print())
+#         print("\n---\n")
+
+
+if __name__ == "__main__":
+    print(graph(""))

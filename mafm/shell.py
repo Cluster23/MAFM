@@ -2,8 +2,8 @@ import os
 import subprocess
 import tempfile
 import time
-from fileops import make_soft_links, get_file_data, get_all_file_data
-from sqlite import (
+from rag.fileops import make_soft_links, get_file_data, get_all_file_data
+from rag.sqlite import (
     initialize_database,
     insert_file_info,
     insert_directory_structure,
@@ -14,12 +14,12 @@ from sqlite import (
     delete_file_info,
     delete_directory_structure,
 )
-from vectorDb import (
+from rag.vectorDb import (
     initialize_vector_db,
     save,
     search,
 )
-from embedding import initialize_model
+from rag.embedding import initialize_model
 
 link_dir = None
 
@@ -88,7 +88,7 @@ def start_command_python(root):
     insert_file_info(id, root, 1, "filesystem.db")
 
     # 루트의 부모 디렉토리 찾기
-    last_slash_index = root.rfind('/')
+    last_slash_index = root.rfind("/")
     if last_slash_index != -1:
         root_parent = root[:last_slash_index]
 
@@ -128,12 +128,14 @@ def start_command_python(root):
 
             # 파일 데이터를 500Bytes씩 읽기
             try:
-                with open(full_path, 'rb') as file:
+                with open(full_path, "rb") as file:
                     while True:
                         chunk = file.read(500)
                         if not chunk:
                             break
-                        file_chunks.append(chunk.decode('utf-8', errors='ignore'))  # 바이너리 데이터를 문자열로 변환
+                        file_chunks.append(
+                            chunk.decode("utf-8", errors="ignore")
+                        )  # 바이너리 데이터를 문자열로 변환
             except Exception as e:
                 print(f"Failed to read file data for {full_path}: {e}")
                 continue
@@ -174,8 +176,8 @@ def start_command_c(root):
             # directory_structure 테이블에 디렉토리 정보 삽입
             parent_dir = os.path.dirname(path) if path != root else None
             print(path)
-            insert_file_info(id,path,is_dir,"filesystem.db")
-            insert_directory_structure(id,path,parent_dir,"filesystem.db")
+            insert_file_info(id, path, is_dir, "filesystem.db")
+            insert_directory_structure(id, path, parent_dir, "filesystem.db")
 
         else:
             print(path)
@@ -189,10 +191,11 @@ def start_command_c(root):
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
 
+
 def shell():
     global link_dir
 
-    initialize_model() # embedding 모델 초기화
+    initialize_model()  # embedding 모델 초기화
 
     # root 위치에서부터 MAFM을 활성화
     # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
@@ -222,8 +225,6 @@ def shell():
             continue
         else:
             execute_command(command)
-
-
 
 
 if __name__ == "__main__":
