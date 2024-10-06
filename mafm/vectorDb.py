@@ -1,5 +1,6 @@
 from pymilvus import MilvusClient, connections, Collection, FieldSchema, CollectionSchema, DataType
-from embedding import embedding
+from embedding import embedding, log_memory_usage
+import gc
 
 # MilvusClient 전역 클라이언트 객체 생성
 client_cache = {}
@@ -26,7 +27,7 @@ def initialize_vector_db(db_name):
 
         client.create_collection(
             collection_name="demo_collection",
-            dimension=1024,
+            dimension=1024, # stella는 1024
         )
 
         return client
@@ -54,9 +55,8 @@ def save(db_name, id, queries):
 
     try:
         # 쿼리 임베딩
-        print("embedding 직전")
         query_embeddings = embedding(queries)
-        print("embedding 직후")
+
 
         # 임베딩 데이터 저장
         data = [
@@ -64,9 +64,15 @@ def save(db_name, id, queries):
             for i in range(len(query_embeddings))
         ]
 
+
         # 데이터 삽입
         res = client.insert(collection_name="demo_collection", data=data)
         print(res)
+
+        # 임베딩 값 삭제 후 가비지 컬렉션 호출
+        del query_embeddings
+        del data
+        gc.collect()
 
     except MemoryError as me:
         print(f"MemoryError: {me}")
@@ -96,3 +102,12 @@ def search(db_name, query):
     )
 
     print(res)
+
+import resource
+
+
+# initialize_vector_db("/Users/Ruffles/Downloads/MAFM_test/dir1.db")
+# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 1, ["Hello, world!", "How are you?"])
+# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 2, ["Hello, world!", "How are you?"])
+# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 3, ["Hello, world!", "How are you?"])
+# save("/Users/Ruffles/Downloads/MAFM_test/dir1.db", 4, ["This is a really long query that is supposed to test how the system behaves with large inputs.", "How are you?"])

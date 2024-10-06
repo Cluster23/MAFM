@@ -19,12 +19,14 @@ from vectorDb import (
     save,
     search,
 )
+from embedding import initialize_model
 
 link_dir = None
 
 
 def execute_command(command):
     global link_dir
+
     try:
         cmd_parts = command.strip().split()
         if cmd_parts[0] == "mf":
@@ -52,21 +54,6 @@ def execute_command(command):
                 print("cd: missing argument")
             except FileNotFoundError:
                 print(f"cd: no such file or directory: {cmd_parts[1]}")
-
-        elif cmd_parts[0] == "start":
-            # start 뒤에 오는 경로를 root로 지정해서, 해당 위치에서부터 MAFM을 활성화
-            # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
-            try:
-                root = cmd_parts[1]
-
-                # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
-                start_command_python(root)
-                # start_command_c(root)
-                # get_file_data(root)
-            except IndexError:
-                print("start: missing argument")
-            except FileNotFoundError:
-                print(f"start: no such file or directory: {cmd_parts[1]}")
 
         else:
             result = subprocess.run(cmd_parts, check=True)
@@ -137,22 +124,22 @@ def start_command_python(root):
             # 파일 정보 삽입
             insert_file_info(id, full_path, 0, "filesystem.db")
 
-            # 파일 내용을 읽어서 처리
+            file_chunks = []
+
+            # 파일 데이터를 500Bytes씩 읽기
             try:
-                file_data = get_file_data(full_path)  # get_file_data 함수 사용
-                # file_data 자체가 이미 500Bytes 씩 잘려져 있음
-                # file_data[2 ~ 사이즈 / 500]까지 존재
-                if not file_data:
-                    raise Exception(f"Failed to read file data for {full_path}")
-
-                # 파일 내용 중에서 조각들만 추출 (data[2], data[3], ...)
-                file_chunks = file_data[2:]  # 파일 조각 리스트 (마지막 None 이전까지)
-
-                # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
-                save(dirpath + ".db", id, file_chunks)
-
+                with open(full_path, 'rb') as file:
+                    while True:
+                        chunk = file.read(500)
+                        if not chunk:
+                            break
+                        file_chunks.append(chunk.decode('utf-8', errors='ignore'))  # 바이너리 데이터를 문자열로 변환
             except Exception as e:
-                print(f"Error reading file {full_path}: {e}")
+                print(f"Failed to read file data for {full_path}: {e}")
+                continue
+
+            # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+            save(dirpath + ".db", id, file_chunks)
 
             id += 1
 
@@ -204,6 +191,22 @@ def start_command_c(root):
 
 def shell():
     global link_dir
+
+    initialize_model() # embedding 모델 초기화
+
+    # root 위치에서부터 MAFM을 활성화
+    # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
+    try:
+        root = "/Users/Ruffles/Downloads/MAFM_test"
+
+        # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
+        start_command_python(root)
+        # start_command_c(root)
+        # get_file_data(root)
+    except IndexError:
+        print("start: missing argument")
+    except FileNotFoundError:
+        print(f"start: no such file or directory: {root}")
 
     while True:
         cwd = os.getcwd()

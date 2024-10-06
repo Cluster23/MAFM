@@ -1,4 +1,6 @@
 from sentence_transformers import SentenceTransformer
+import os
+import psutil
 
 # 모델을 전역 변수로 초기화하여 재사용
 model = None
@@ -18,8 +20,10 @@ def initialize_model():
                 "dunzhang/stella_en_400M_v5",
                 trust_remote_code=True,
                 device="cpu",
-                config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}
-            )
+                config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False})
+
+            # model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v1")
+
             print("모델이 성공적으로 초기화되었습니다.")
         except Exception as e:
             print(f"모델 초기화 중 오류 발생: {e}")
@@ -34,9 +38,13 @@ def embedding(queries):
 
     try:
         # 쿼리 임베딩
-        print("embedding 실행 직전")
-        query_embeddings = model.encode(queries, prompt_name="s2p_query")
+        log_memory_usage()
+        if not isinstance(queries, list) or not all(isinstance(q, str) for q in queries):
+            raise ValueError("The input to encode() must be a list of strings.")
+        query_embeddings = model.encode(queries)
+        log_memory_usage()
         print(queries, "embedding 실행 완료")
+
         return query_embeddings.tolist()
     except MemoryError as me:
         print(f"MemoryError: {me}")
@@ -44,4 +52,6 @@ def embedding(queries):
         print(f"embedding 중 오류 발생: {e}")
         return None
 
-initialize_model()
+def log_memory_usage():
+    process = psutil.Process(os.getpid())
+    print(f"현재 메모리 사용량: {process.memory_info().rss / 1024 ** 2} MB")
