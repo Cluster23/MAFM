@@ -1,6 +1,6 @@
 import functools
 import operator
-from typing import Sequence, TypedDict, Annotated
+from typing import Sequence, TypedDict, Annotated, List
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, StateGraph, START
@@ -13,16 +13,12 @@ class AgentState(TypedDict):
     next: str
 
 
-def graph(directory_path: str):
-    human_input = HumanMessage(
-        content="한국어에 대해서 배우고 싶어 이전에 관련한 자료를 다운로드 받았던 것 같아"
-    )
+def graph(directory_path: str, prompt: str) -> List[str]:
+    human_input = HumanMessage(content=prompt)
 
-    members = get_directories_by_depth(
-        "/Users/parksehwan/Documents/MAFM/mafm/rag/filesystem.db", 1
-    )
+    members = get_directories_by_depth(directory_path + ".db", 1)
     output_dict = []
-
+    print(members, human_input)
     # graph 생성
     workflow = StateGraph(AgentState)
     supervisor_node = functools.partial(supervisor_agent, member_list=members)

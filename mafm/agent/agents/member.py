@@ -2,13 +2,15 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel, Field
 from typing import Literal, List
 from .llm_model import api_key
+
 # from .tools import get_file_list
 from langchain_openai import ChatOpenAI
 from langgraph.store.base import BaseStore
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.utils.function_calling import convert_to_openai_function
 from langchain_core.messages import HumanMessage
-# from rag.vectorDb import search
+
+from rag.vectorDb import search
 
 
 class routeResponse(BaseModel):
@@ -25,8 +27,7 @@ def get_file_list(query: queryResponse) -> List[str]:
     get file list from user input
     """
     print(query)
-    # return search(query.query, query.directory_name + ".db")
-    return ["A.txt", "B.txt", "C.txt"]
+    return search(query.query, query.directory_name + ".db")
 
 
 def agent_node(state, directory_name: str, output_dict: List[str]):

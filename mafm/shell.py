@@ -25,7 +25,7 @@ from agent.graph import graph
 link_dir = None
 
 
-def execute_command(command):
+def execute_command(command, root_dir):
     global link_dir
 
     # temp_dir_path 지정
@@ -58,8 +58,8 @@ def execute_command(command):
                 print("mlink: missing arguments. Usage: mlink <dir_path>")
                 return
 
-            directory_path = cmd_parts[1]
-            paths = graph(directory_path)
+            prompt = cmd_parts[1]
+            paths = graph(root_dir, prompt)
 
             # 임시 디렉토리 생성
             temp_dir = tempfile.TemporaryDirectory(dir=temp_dir_path)
@@ -221,7 +221,7 @@ def start_command_c(root):
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
 
 
-def shell():
+def shell(root_dir: str):
     global link_dir
 
     initialize_model()  # embedding 모델 초기화
@@ -229,16 +229,14 @@ def shell():
     # root 위치에서부터 MAFM을 활성화
     # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
     try:
-        root = "/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test"
-
         # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
-        start_command_python(root)
+        start_command_python(root_dir)
         # start_command_c(root)
         # get_file_data(root)
     except IndexError:
         print("start: missing argument")
     except FileNotFoundError:
-        print(f"start: no such file or directory: {root}")
+        print(f"start: no such file or directory: {root_dir}")
 
     while True:
         cwd = os.getcwd()
@@ -253,8 +251,17 @@ def shell():
         elif command.strip() == "":
             continue
         else:
-            execute_command(command)
+            execute_command(command, root_dir)
 
+
+import argparse
 
 if __name__ == "__main__":
-    shell()
+    parser = argparse.ArgumentParser(description="MAFM shell")
+    parser.add_argument("-r", "--root", help="Root directory path")
+    args = parser.parse_args()
+
+    if not args.root:
+        print("Root directory path is required.")
+    else:
+        shell(args.root)

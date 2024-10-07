@@ -1,6 +1,6 @@
 import ctypes
 
-lib = ctypes.CDLL("./C_library/libfileops.so")
+lib = ctypes.CDLL("./rag/C_library/libfileops.so")
 
 lib.make_soft_links.argtypes = [
     ctypes.POINTER(ctypes.c_char_p),
@@ -56,5 +56,6 @@ def get_all_file_data(directory):
             idx += 1
         files.append(data_list)
     return files
+
 
 # get_file_data("/Users/Ruffles/Downloads/MAFM_test/text9.txt")
