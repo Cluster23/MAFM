@@ -27,7 +27,7 @@ def get_file_list(query: queryResponse) -> List[str]:
     get file list from user input
     """
     print(query)
-    return search(query.query, query.directory_name + ".db")
+    return search(query.directory_name + ".db", [query.query])
 
 
 def agent_node(state, directory_name: str, output_dict: List[str]):
@@ -51,6 +51,9 @@ def agent_node(state, directory_name: str, output_dict: List[str]):
     query_chain = prompt | llm.with_structured_output(queryResponse)
     chain = query_chain | get_file_list
     res = chain.invoke(state)
-    output_dict.extend(res)
     print("RES", res, "\n\n\n\n")
-    return {"messages": res}
+    if res:
+        output_dict.extend(res)
+        return {"messages": res}
+    else:
+        return {"messages": []}
