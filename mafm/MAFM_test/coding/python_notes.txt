@@ -1,0 +1,4 @@
+Python Notes
+- Basics: Variables, Data Types, Loops
+- Advanced: List Comprehensions, Generators, Decorators
+- Libraries: NumPy for numerical operations, Pandas for data analysis.

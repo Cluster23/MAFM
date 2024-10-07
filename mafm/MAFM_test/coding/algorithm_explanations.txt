@@ -1,0 +1,4 @@
+Algorithm Explanations
+This file contains explanations of common algorithms:
+1. Sorting Algorithms: Bubble Sort, Merge Sort, Quick Sort
+2. Search Algorithms: Binary Search, Depth-First Search (DFS), Breadth-First Search (BFS).
