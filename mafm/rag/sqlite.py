@@ -72,6 +72,15 @@ def get_file_info(db_name='filesystem.db'):
     connection.close()
     return rows
 
+def get_path_by_id(id, db_name='filesystem.db'):
+    connection = sqlite3.connect(db_name)
+    cursor = connection.cursor()
+    cursor.execute('SELECT file_path FROM file_info WHERE id = ?', (id,))
+    rows = cursor.fetchall()
+    connection.close()
+    file_path = rows[0][0]
+    return file_path
+
 def get_directory_structure(db_name='filesystem.db'):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()

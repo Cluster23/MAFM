@@ -1,3 +1,5 @@
+import ast
+
 from pymilvus import (
     MilvusClient,
     connections,
@@ -6,8 +8,10 @@ from pymilvus import (
     CollectionSchema,
     DataType,
 )
-from .embedding import embedding, log_memory_usage
+from .embedding import embedding
 import gc
+
+from .sqlite import get_path_by_id
 
 # MilvusClient 전역 클라이언트 객체 생성
 client_cache = {}
@@ -90,6 +94,7 @@ def save(db_name, id, queries):
 
 
 # input: query들의 리스트임에 유의!!
+# Output: input의 query와 가장 가까운 2개의 파일 경로
 def search(db_name, query_list):
 
     global client_cache
@@ -112,9 +117,18 @@ def search(db_name, query_list):
         collection_name="demo_collection",
         data=query_vectors,
         limit=2,
-        output_fields=["word"],
+        output_fields=["id"],
     )
-    return res
 
 
+    print(res)
 
+    # milvus search 를 수행한 결과에서 id값들만 가져옴
+    id_list = [item['id'] for item in res[0]]
+
+    # 해당 id 값을 토대로 file_path를 검색
+    # milvus db 자체에 file_path를 저장하지 않는 이유는 파일 수정, 삭제등을 용이하게 만들기 위해서
+    path_list = [get_path_by_id(id,"filesystem.db") for id in id_list]
+
+    print(path_list)
+    return path_list
