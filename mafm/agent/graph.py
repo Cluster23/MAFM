@@ -16,7 +16,7 @@ class AgentState(TypedDict):
 def graph(directory_path: str, prompt: str) -> List[str]:
     human_input = HumanMessage(content=prompt)
 
-    members = get_directories_by_depth(directory_path + ".db", 1)
+    members = get_directories_by_depth(1) # get_directories_by_depth 고쳐야함. 지금은 항상 filesystem.db 기준임
     output_dict = []
     print(members, human_input)
     # graph 생성

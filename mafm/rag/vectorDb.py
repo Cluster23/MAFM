@@ -89,7 +89,9 @@ def save(db_name, id, queries):
         print(f"Error occurred during saving data to Milvus: {e}")
 
 
+# input: query들의 리스트임에 유의!!
 def search(db_name, query_list):
+
     global client_cache
 
     # 캐시에서 클라이언트를 가져옴

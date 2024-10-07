@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <io.h>
-#include <Windows.h>
 
 // make_soft_links: 여러 파일 경로에 대해 임시 디렉토리에 소프트 링크를 만든다.
 // 입력: paths (파일 경로 배열), num_paths (경로 개수), temp_dir (임시 디렉토리 경로)

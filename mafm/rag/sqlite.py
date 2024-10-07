@@ -125,9 +125,10 @@ def delete_directory_structure(record_id, db_name='filesystem.db'):
     connection.close()
 
 
-def get_directories_by_depth(db_name, depth):
+def get_directories_by_depth(depth):
     try:
         # 데이터베이스 연결
+        db_name = 'filesystem.db'
         conn = sqlite3.connect(db_name)
         print("get_directories_by_depth")
         cursor = conn.cursor()
