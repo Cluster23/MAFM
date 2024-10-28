@@ -25,7 +25,7 @@ MAFM(Multi-Agent File Management)은 기존 파일 관리 시스템의 한계를
 ## 기술 스택
 - Python
 - C
-- Langraph
+- LangGraph
 
 <br>
 
