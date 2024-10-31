@@ -21,7 +21,7 @@ from rag.vectorDb import (
 )
 from rag.embedding import initialize_model
 from agent.graph import graph
-
+import ctypes
 link_dir = None
 def start_command_python(root):
     # 시작 시간 기록
@@ -113,6 +113,10 @@ def start_command_python(root):
 
 
 # SQLite DB에 파일 및 디렉토리 데이터 삽입
+import os
+import time
+
+
 def start_command_c(root):
     # 시작 시간 기록
     start_time = time.time()
@@ -124,27 +128,52 @@ def start_command_c(root):
         print(f"Error initializing database: {e}")
         return
 
-    # C 코드에서 디렉토리 데이터 가져오기
+    # C 코드에서 파일 데이터 가져오기
     file_data_list = get_all_file_data(root)
 
+    if file_data_list is None:
+        print("Error: file_data_list is NULL.")
+        return
+
     id = 1
-    # 데이터베이스에 파일 및 디렉토리 정보 삽입
+    added_directories = set()  # 이미 추가된 디렉토리 경로를 저장하는 집합
+
+    # 데이터베이스에 파일 정보 삽입
     for file_data in file_data_list:
-        path = file_data[0]  # 전체 경로
-        name = file_data[1]  # 파일 또는 디렉토리 이름
-        is_dir = file_data[2] == b"True"  # 디렉토리 여부 확인
+        path = file_data[0]  # 절대 경로
+        name = file_data[1]  # 파일 이름
+        is_dir = False  # file_data_list에는 파일만 포함되므로 기본적으로 False
 
-        # 디렉토리인지 파일인지에 따라 테이블에 삽입
-        if is_dir:
-            # directory_structure 테이블에 디렉토리 정보 삽입
-            parent_dir = os.path.dirname(path) if path != root else None
-            print(path)
-            insert_file_info(id, path, is_dir, "filesystem.db")
-            insert_directory_structure(id, path, parent_dir, "filesystem.db")
+        # 파일이 속한 디렉토리 경로 확인
+        dirpath = os.path.dirname(path)
 
-        else:
-            print(path)
-            insert_file_info(id, path, is_dir, "filesystem.db")
+        # 비밀 파일 제외, db 파일 제외
+        if name.startswith(".") or name.endswith(".db"):
+            continue
+
+        # 디렉토리가 추가되지 않았다면 추가
+        if dirpath not in added_directories:
+            parent_dir = os.path.dirname(dirpath) if dirpath != root else None
+            insert_file_info(id, dirpath, 1, "filesystem.db")
+            insert_directory_structure(id, dirpath, parent_dir, "filesystem.db")
+
+            try:
+                initialize_vector_db(dirpath + ".db")  # 디렉토리와 대응되는 Vector DB 생성
+            except Exception as e:
+                print(f"Error initializing vector DB for directory: {e}")
+                continue
+
+            added_directories.add(dirpath)  # 디렉토리 경로를 집합에 추가
+            id += 1
+
+        # 파일 정보 삽입
+        insert_file_info(id, path, is_dir, "filesystem.db")
+
+
+        # 파일 내용을 벡터화하여 해당 디렉토리의 Vector DB에 저장
+        file_chunks = file_data[2:]
+        print(f"Embedding 하는 파일의 절대 경로: {path}")
+        save(dirpath + ".db", id, file_chunks)
         id += 1
 
     # 종료 시간 기록
@@ -154,6 +183,6 @@ def start_command_c(root):
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
 
-
 if __name__ == "__main__":
-    start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+#    start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+    start_command_c("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")

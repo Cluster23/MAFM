@@ -37,25 +37,30 @@ def get_file_data(path):
 lib.get_all_file_data.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
 lib.get_all_file_data.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p))
 
+# ctypes를 통해 free_all_file_data 함수를 정의
+lib.free_file_data_array.argtypes = [ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)), ctypes.c_int]
+lib.free_file_data_array.restype = None
 
 def get_all_file_data(directory):
     num_files = ctypes.c_int(0)
     result = lib.get_all_file_data(directory.encode("utf-8"), ctypes.byref(num_files))
     files = []
-    for i in range(num_files.value):
-        idx = 0
-        data_list = []
-        print(result[i])
-        while result[i][idx] is not None:
-            # print(ctypes.string_at(result[i][idx]))
-            try:
-                string = ctypes.string_at(result[i][idx]).decode("utf-8")
-            except:
-                string = ctypes.string_at(result[i][idx])
-            data_list.append(string)
-            idx += 1
-        files.append(data_list)
-    return files
+    try:
+        for i in range(num_files.value):
+            idx = 0
+            data_list = []
+            while result[i][idx] is not None:
+                try:
+                    string = ctypes.string_at(result[i][idx]).decode("utf-8")
+                except:
+                    string = ctypes.string_at(result[i][idx])
+                data_list.append(string)
+                idx += 1
+            files.append(data_list)
+        return files
+    finally:
+        # C에서 할당된 메모리 해제
+        lib.free_file_data_array(result, num_files.value)
 
 
 # get_file_data("/Users/Ruffles/Downloads/MAFM_test/text9.txt")

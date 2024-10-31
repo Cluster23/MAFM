@@ -113,7 +113,7 @@ def start_command_python(root):
         print(f"Error initializing vector DB for root: {e}")
         return
 
-    print(root)
+    # print(root)
     insert_file_info(id, root, 1, "filesystem.db")
 
     # 루트의 부모 디렉토리 찾기
@@ -136,7 +136,7 @@ def start_command_python(root):
                 print(f"Error initializing vector DB for directory: {e}")
                 continue
 
-            print(full_path)
+            print(f"디렉토리 경로: {full_path}")
             insert_file_info(id, full_path, 1, "filesystem.db")
             insert_directory_structure(id, full_path, dirpath, "filesystem.db")
             id += 1
@@ -148,7 +148,7 @@ def start_command_python(root):
                 continue
 
             full_path = os.path.join(dirpath, filename)
-            print(full_path)
+            print(f"Embedding 하는 파일의 절대 경로: {full_path}")
 
             # 파일 정보 삽입
             insert_file_info(id, full_path, 0, "filesystem.db")
@@ -187,8 +187,12 @@ def start_command_c(root):
     # 시작 시간 기록
     start_time = time.time()
 
-    # SQLite 데이터베이스 연결
-    initialize_database("filesystem.db")
+    # SQLite DB 연결 및 초기화
+    try:
+        initialize_database("filesystem.db")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        return
 
     # C 코드에서 디렉토리 데이터 가져오기
     file_data_list = get_all_file_data(root)
