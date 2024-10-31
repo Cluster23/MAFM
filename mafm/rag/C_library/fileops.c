@@ -197,6 +197,22 @@ char** get_file_data(const char* path) {
 }
 
 
+// 파일 데이터를 해제하는 함수 (get_file_data로부터 반환된 메모리 해제)
+void free_file_data(char** data) {
+    if (!data) return;
+    for (int i = 0; data[i] != NULL; i++) {
+        free(data[i]); // 각 문자열에 할당된 메모리 해제
+    }
+    free(data); // data 포인터 자체 해제
+}
+
+// 파일 데이터 배열을 해제하는 함수
+void free_file_data_array(char*** file_data_array, int num_files) {
+    for (int i = 0; i < num_files; i++) {
+        free_file_data(file_data_array[i]);
+    }
+    free(file_data_array);
+}
 
 // collect_file_data_recursive: 지정된 디렉터리를 재귀적으로 탐색하며 파일 데이터를 수집
 // 입력: dir_path (탐색할 디렉터리 경로), num_files (수집된 파일 개수 포인터), file_data_array (파일 데이터 배열 포인터), depth (재귀 깊이)
@@ -219,23 +235,39 @@ void collect_file_data_recursive(const char* dir_path, int* num_files, char**** 
 
     struct dirent *dir;
     int alloc_size = 4;
+
+    // 동적 메모리 할당 후, 메모리 누수 방지를 위한 코드 추가
     while ((dir = readdir(d)) != NULL) {
+        // 현재 디렉토리와 상위 디렉토리는 건너뛰기
         if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
             continue;
         }
+
         char full_path[512];
         snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, dir->d_name);
 
         struct stat st;
+
+        // 파일 또는 디렉토리의 정보(stat 구조체)를 가져오기
         if (stat(full_path, &st) == 0) {
             if (S_ISREG(st.st_mode)) {
+                // 일반 파일일 경우, 파일 데이터를 수집하는 함수 호출
                 char **data = get_file_data(full_path);
-                if (data) {
-                    (*num_files)++;
-                    if (*num_files > alloc_size){
+                if (data) { // 파일 데이터가 성공적으로 수집된 경우
+                    (*num_files)++; // 파일 수 증가
+
+                    // 파일 수가 할당된 크기를 초과하는 경우
+                    if (*num_files > alloc_size) {
                         alloc_size *= 2;
-                        *file_data_array = realloc(*file_data_array, sizeof(char***) * alloc_size);
+                        char ***temp = realloc(*file_data_array, sizeof(char**) * alloc_size);
+                        if (!temp) { // realloc 실패 시 메모리 해제
+                            free_file_data(data);
+                            closedir(d);
+                            return;
+                        }
+                        *file_data_array = temp;
                     }
+
                     (*file_data_array)[*num_files - 1] = data;
                 }
             } else if (S_ISDIR(st.st_mode)) {
@@ -243,7 +275,7 @@ void collect_file_data_recursive(const char* dir_path, int* num_files, char**** 
             }
         }
     }
-    closedir(d);
+    closedir(d); // 디렉토리 닫기
 }
 
 char*** get_all_file_data(const char* dir_path, int* num_files) {
