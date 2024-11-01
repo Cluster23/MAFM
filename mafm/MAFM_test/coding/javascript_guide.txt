@@ -1,6 +1,0 @@
-JavaScript Guide
-JavaScript is used for adding interactivity to web pages.
-Topics:
-- DOM Manipulation
-- Event Handling
-- Asynchronous Programming using Promises and Async/Await.

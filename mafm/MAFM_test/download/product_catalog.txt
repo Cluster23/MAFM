@@ -1,5 +1,0 @@
-Product Catalog 2024
-1. Product A: Description, Price: $50
-2. Product B: Description, Price: $30
-3. Product C: Description, Price: $70
-Contact us for more details.

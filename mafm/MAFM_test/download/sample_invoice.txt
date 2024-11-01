@@ -1,8 +1,0 @@
-Invoice No: 12345
-Date: 2024-10-07
-Customer: John Doe
-Items:
-- Product A: $50
-- Product B: $30
-Total: $80
-Thank you for your purchase!
