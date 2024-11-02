@@ -204,6 +204,7 @@ def start_command_c(root):
         name = file_data[1]  # 파일 또는 디렉토리 이름
         is_dir = file_data[2] == b"True"  # 디렉토리 여부 확인
 
+        print(is_dir)
         # 디렉토리인지 파일인지에 따라 테이블에 삽입
         if is_dir:
             # directory_structure 테이블에 디렉토리 정보 삽입
@@ -248,6 +249,7 @@ def shell(root_dir: str):
             link_dir.cleanup()
             link_dir = None
         command = input(f"{cwd} $ ")
+        command = command.encode("utf-8").decode("utf-8")
 
         if command.strip().lower() in ["exit", "quit"]:
             print("쉘 종료 중...")

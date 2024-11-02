@@ -5,6 +5,7 @@ import psutil
 # 모델을 전역 변수로 초기화하여 재사용
 model = None
 
+
 def initialize_model():
     global model
     if model is None:
@@ -20,7 +21,11 @@ def initialize_model():
                 "dunzhang/stella_en_400M_v5",
                 trust_remote_code=True,
                 device="cpu",
-                config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False})
+                config_kwargs={
+                    "use_memory_efficient_attention": False,
+                    "unpad_inputs": False,
+                },
+            )
 
             # model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v1")
 
@@ -38,7 +43,9 @@ def embedding(queries):
 
     try:
         # 쿼리 임베딩
-        if not isinstance(queries, list) or not all(isinstance(q, str) for q in queries):
+        if not isinstance(queries, list) or not all(
+            isinstance(q, str) for q in queries
+        ):
             raise ValueError("The input to encode() must be a list of strings.")
         query_embeddings = model.encode(queries)
         log_memory_usage()
@@ -50,6 +57,7 @@ def embedding(queries):
     except Exception as e:
         print(f"embedding 중 오류 발생: {e}")
         return None
+
 
 def log_memory_usage():
     process = psutil.Process(os.getpid())

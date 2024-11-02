@@ -20,7 +20,7 @@ def analyst_agent(state, input_prompt: str, output_dict: List[str]):
             MessagesPlaceholder(variable_name="messages"),
             (
                 "system",
-                "주어진 파일 경로들 안에서 사용자 요청에 맞는 파일 경로만 뽑아주세요. 주어지지 않은 파일 경로는 뽑으면 안됩니다. 만약 뽑을 파일이 없는 경우 []를 반환해주세요. "
+                "주어진 파일 경로들 안에서 사용자 요청에 맞는 파일 경로만 뽑아주세요. 주어지지 않은 파일 경로는 뽑으면 안됩니다."
                 "사용자 요청: {input_prompt}"
                 "파일 경로: {output_dict}",
             ),
