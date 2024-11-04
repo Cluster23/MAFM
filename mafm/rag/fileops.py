@@ -38,8 +38,8 @@ lib.get_all_file_data.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
 lib.get_all_file_data.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p))
 
 # ctypes를 통해 free_all_file_data 함수를 정의
-lib.free_file_data_array.argtypes = [ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)), ctypes.c_int]
 lib.free_file_data_array.restype = None
+lib.free_file_data_array.argtypes = [ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)), ctypes.c_int]
 
 def get_all_file_data(directory):
     num_files = ctypes.c_int(0)
@@ -60,7 +60,8 @@ def get_all_file_data(directory):
         return files
     finally:
         # C에서 할당된 메모리 해제
-        lib.free_file_data_array(result, num_files.value)
+        result_casted = ctypes.cast(result, ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)))
+        lib.free_file_data_array(result_casted, num_files.value)
 
 
 # get_file_data("/Users/Ruffles/Downloads/MAFM_test/text9.txt")
