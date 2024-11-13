@@ -2,11 +2,10 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from pathlib import Path
-from .vectorDb import save
-from .sqlite import insert_file_info, insert_directory_structure, update_file_info
+from .sqlite import insert_file_info, insert_directory_structure, update_file_info, delete_directory_and_subdirectories
 from .embedding import embedding, initialize_model
 from ..rag.fileops import get_file_data
-from .vectorDb import initialize_vector_db
+from .vectorDb import save, delete_vector_db, initialize_vector_db
 import os
 
 
@@ -14,6 +13,24 @@ class FileEventHandler(FileSystemEventHandler):
     def __init__(self, db_path):
         super().__init__()
         self.db_path = db_path
+
+    def on_deleted(self, event):
+        """파일 삭제 이벤트 처리"""
+        if event.is_directory:
+            # 디렉토리인 경우 -> 벡터 DB 자체를 삭제하고 SQLite에서 해당 디렉토리와 관련 데이터를 모두 삭제
+            dirpath = event.src_path
+            dirname = os.path.basename(dirpath)
+            db_name = dirpath + "/" + dirname + ".db"
+            delete_vector_db(db_name)
+
+            # SQLite에서도 해당 디렉토리 관련 데이터 삭제
+            # 필요한 경우, 적절한 함수 호출로 SQLite 데이터 삭제 로직을 추가
+            print(f"Deleted directory and associated VectorDB: {db_name}")
+            return
+
+        # 파일 삭제 처리
+        print(f"Deleted file: {event.src_path}")
+        # SQLite에서 해당 파일 관련 데이터 삭제 로직 추가 (필요 시)
 
     def on_modified(self, event):
         """파일 수정 이벤트 처리"""
@@ -32,11 +49,11 @@ class FileEventHandler(FileSystemEventHandler):
         # DB에 저장된 경로를 새로운 경로로 업데이트
         self.process_file(event.dest_path)
 
-    def on_created(self, event, absolute_file_path):
+    def on_created(self, event):
         """새로운 파일이 생겼을 경우"""
-
-        dirname = os.path.dirname(absolute_file_path)
-        dirpath = Path(dirname)
+        absolute_file_path = event.src_path
+        dirpath = os.path.dirname(absolute_file_path)
+        dirname = os.path.basename(dirpath)
 
         if event.is_directory:
             # 생성된 것이 디렉토리인 경우 -> 새로운 VectorDB를 생성 후 경로를 SQLite에 저장

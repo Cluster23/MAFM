@@ -47,6 +47,29 @@ def initialize_vector_db(db_name):
         print(f"Error initializing vector DB for {db_name}: {e}")
         return None
 
+def delete_vector_db(db_name):
+    global client_cache
+
+    # 캐시에서 클라이언트를 가져옴
+    if db_name not in client_cache:
+        print(f"Client for {db_name} does not exist.")
+        return
+
+    client = client_cache[db_name]
+
+    # 컬렉션이 존재하는지 확인
+    if client.has_collection(collection_name="demo_collection"):
+        try:
+            # 컬렉션 삭제
+            client.drop_collection(collection_name="demo_collection")
+            print(f"Collection 'demo_collection' in {db_name} has been deleted.")
+            # 캐시에서도 클라이언트를 제거
+            del client_cache[db_name]
+        except Exception as e:
+            print(f"Error deleting collection in {db_name}: {e}")
+    else:
+        print(f"Collection 'demo_collection' does not exist in {db_name}")
+
 
 def save(db_name, id, queries):
     global client_cache

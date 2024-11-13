@@ -247,3 +247,29 @@ def get_directories_by_depth(depth):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return []
+
+
+def delete_directory_and_subdirectories(conn, dir_path):
+    cursor = conn.cursor()
+
+    # directory_structure 테이블에서 dir_path가 포함된 모든 레코드 삭제
+    cursor.execute(
+        """
+        DELETE FROM directory_structure
+        WHERE dir_path LIKE ?
+        """,
+        (f"{dir_path}%",)
+    )
+
+    # file_info 테이블에서 file_path가 dir_path로 시작하는 모든 레코드 삭제
+    cursor.execute(
+        """
+        DELETE FROM file_info
+        WHERE file_path LIKE ?
+        """,
+        (f"{dir_path}%",)
+    )
+
+    # 변경 사항을 커밋
+    conn.commit()
+    print(f"Deleted all records related to {dir_path} and its subdirectories.")
