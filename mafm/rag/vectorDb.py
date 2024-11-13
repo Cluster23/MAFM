@@ -38,7 +38,7 @@ def initialize_vector_db(db_name):
 
         client.create_collection(
             collection_name="demo_collection",
-            dimension=1024,  # stella는 1024
+            dimension=384,  # stella는 1024 스노우플레이크는 384
         )
 
         return client
@@ -120,15 +120,14 @@ def search(db_name, query_list):
         output_fields=["id"],
     )
 
-
     print(res)
 
     # milvus search 를 수행한 결과에서 id값들만 가져옴
-    id_list = [item['id'] for item in res[0]]
+    id_list = [item["id"] for item in res[0]]
 
     # 해당 id 값을 토대로 file_path를 검색
     # milvus db 자체에 file_path를 저장하지 않는 이유는 파일 수정, 삭제등을 용이하게 만들기 위해서
-    path_list = [get_path_by_id(id,"filesystem.db") for id in id_list]
+    path_list = [get_path_by_id(id, "filesystem.db") for id in id_list]
 
     print(path_list)
     return path_list

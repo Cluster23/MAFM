@@ -18,7 +18,8 @@ def initialize_model():
             # GPU로 변환 시 SentenceTransformer() 메소드 뒤에 .cuda() 메소드를 붙여주면 됨
             # 모델 초기화
             model = SentenceTransformer(
-                "dunzhang/stella_en_400M_v5",
+                # "dunzhang/stella_en_400M_v5",
+                "avsolatorio/GIST-small-Embedding-v0",
                 trust_remote_code=True,
                 device="cpu",
                 config_kwargs={
