@@ -1,13 +1,17 @@
 모델이 성공적으로 초기화되었습니다.
-on_modified
---created--
 --created--
 dirpath: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
 dirname: coding
 [(1,)]
-Open /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db failed, the file has been opened by another program
-Start local milvus failed
-Failed to create new connection using: 8e456cce67984f8da1dba697841048b2
+Error occurred during saving data to Milvus in '/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db': <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+Created file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/python_coding 복사본 2.txt
+on_modified
+on_modified
+--modified--
+dir_path: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
+db_name: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db
+[(1,)]
+Error occurred during remove_by_id in Milvus in '1': <ConnectionConfigException: (code=1, message=Alias should be string, but <class 'int'> is given.)>
 Exception in thread Thread-2:
 Traceback (most recent call last):
   File "/Users/Ruffles/anaconda3/lib/python3.11/threading.py", line 1038, in _bootstrap_inner
@@ -18,18 +22,11 @@ Traceback (most recent call last):
     handler.dispatch(event)
   File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/events.py", line 217, in dispatch
     getattr(self, f"on_{event.event_type}")(event)
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 134, in on_created
-    save(dirpath + "/" + dirname + ".db", get_id_by_path(absolute_file_path, "filesystem.db"), file_chunks[2:])
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/vectorDb.py", line 59, in save
-    client = MilvusClient(db_name)
-             ^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 60, in __init__
-    self._using = self._create_connection(
-                  ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 728, in _create_connection
-    raise ex from ex
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 725, in _create_connection
-    connections.connect(using, user, password, db_name, token, uri=uri, **kwargs)
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/orm/connections.py", line 384, in connect
-    raise ConnectionConfigException(message="Open local milvus failed")
-pymilvus.exceptions.ConnectionConfigException: <ConnectionConfigException: (code=1, message=Open local milvus failed)>
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 89, in on_modified
+    remove_by_id(id, db_name)  # 기존 벡터 데이터 제거
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/vectorDb.py", line 164, in remove_by_id
+    connections.disconnect(alias=db_name)
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/orm/connections.py", line 282, in disconnect
+    raise ConnectionConfigException(message=ExceptionsMessage.AliasType % type(alias))
+pymilvus.exceptions.ConnectionConfigException: <ConnectionConfigException: (code=1, message=Alias should be string, but <class 'int'> is given.)>

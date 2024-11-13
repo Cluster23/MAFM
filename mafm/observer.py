@@ -2,8 +2,8 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import os
-from mafm.rag.vectorDb import save
-from mafm.rag.sqlite import (
+from rag.vectorDb import save
+from rag.sqlite import (
     insert_file_info,
     insert_directory_structure,
     update_file_info,
@@ -13,12 +13,11 @@ from mafm.rag.sqlite import (
     delete_directory_and_subdirectories,
     initialize_database
 )
-from mafm.rag.embedding import embedding, initialize_model
-from mafm.rag.fileops import get_file_data
-from mafm.rag.vectorDb import (
+from rag.embedding import embedding, initialize_model
+from rag.fileops import get_file_data
+from rag.vectorDb import (
     initialize_vector_db,
     find_by_id,
-    insert_file_embedding,
     remove_by_id,
     delete_vector_db,
 )
