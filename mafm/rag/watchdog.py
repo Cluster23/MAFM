@@ -10,6 +10,7 @@ from .sqlite import (
     get_id_by_path,
     change_directory_path,
     change_file_path,
+    delete_directory_and_subdirectories,
 )
 from .embedding import embedding, initialize_model
 from ..rag.fileops import get_file_data
@@ -18,6 +19,7 @@ from .vectorDb import (
     find_by_id,
     insert_file_embedding,
     remove_by_id,
+    delete_vector_db,
 )
 import os
 
@@ -43,8 +45,19 @@ class FileEventHandler(FileSystemEventHandler):
             return
 
         # 파일 삭제 처리
+        # 1. 벡터 DB에서 파일을 조회한 후 Vector DB에서 해당 파일 삭제
+        # 2. file_info 테이블에서 해당 레코드 삭제
+        file_path = event.src_path
+        dir_path = os.path.dirname(file_path)
+        dir_name = os.path.basename(dir_path)
+
+        db_name = dir_path + "/" + dir_name + ".db"
+        id = get_id_by_path(file_path, "filesystem.db")
+        remove_by_id(id, db_name)
+
         print(f"Deleted file: {event.src_path}")
         # SQLite에서 해당 파일 관련 데이터 삭제 로직 추가 (필요 시)
+
 
     def on_modified(self, event):
         """파일 수정 이벤트 처리"""
