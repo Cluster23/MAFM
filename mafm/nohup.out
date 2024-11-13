@@ -1,3 +1,13 @@
+모델이 성공적으로 초기화되었습니다.
+on_modified
+--created--
+--created--
+dirpath: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
+dirname: coding
+[(1,)]
+Open /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db failed, the file has been opened by another program
+Start local milvus failed
+Failed to create new connection using: 8e456cce67984f8da1dba697841048b2
 Exception in thread Thread-2:
 Traceback (most recent call last):
   File "/Users/Ruffles/anaconda3/lib/python3.11/threading.py", line 1038, in _bootstrap_inner
@@ -8,10 +18,18 @@ Traceback (most recent call last):
     handler.dispatch(event)
   File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/events.py", line 217, in dispatch
     getattr(self, f"on_{event.event_type}")(event)
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 57, in on_deleted
-    id = get_id_by_path(file_path, "filesystem.db")
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/sqlite.py", line 109, in get_id_by_path
-    file_path = rows[0][0]
-                ~~~~^^^
-IndexError: list index out of range
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 134, in on_created
+    save(dirpath + "/" + dirname + ".db", get_id_by_path(absolute_file_path, "filesystem.db"), file_chunks[2:])
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/vectorDb.py", line 59, in save
+    client = MilvusClient(db_name)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 60, in __init__
+    self._using = self._create_connection(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 728, in _create_connection
+    raise ex from ex
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/milvus_client/milvus_client.py", line 725, in _create_connection
+    connections.connect(using, user, password, db_name, token, uri=uri, **kwargs)
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/orm/connections.py", line 384, in connect
+    raise ConnectionConfigException(message="Open local milvus failed")
+pymilvus.exceptions.ConnectionConfigException: <ConnectionConfigException: (code=1, message=Open local milvus failed)>

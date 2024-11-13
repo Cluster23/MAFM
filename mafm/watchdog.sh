@@ -1,1 +1,1 @@
-nohup poetry run python observer.py -r $1 &
+nohup poetry run python -u observer.py -r $1 &

@@ -47,7 +47,7 @@ def delete_vector_db(db_name):
             client.drop_collection(collection_name="demo_collection")
             print(f"Collection 'demo_collection' in {db_name} has been deleted.")
             # 캐시에서도 클라이언트를 제거
-            del client_cache[db_name]
+
         except Exception as e:
             print(f"Error deleting collection in {db_name}: {e}")
     else:
