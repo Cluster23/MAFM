@@ -58,9 +58,11 @@ def insert_file_info(file_path, is_dir, db_name="filesystem.db"):
         """,
         (file_path, is_dir),
     )
+    cursor.execute("SELECT last_insert_rowid()")
+    rows = cursor.fetchall()
     connection.commit()
     connection.close()
-    return cursor.execute("SELECT last_insert_rowid()")
+    return rows[0][0]
 
 
 def insert_directory_structure(id, dir_path, parent_dir_path, db_name="filesystem.db"):
@@ -97,10 +99,10 @@ def get_path_by_id(id, db_name="filesystem.db"):
     return file_path
 
 
-def get_id_by_path(id, db_name="filesystem.db"):
+def get_id_by_path(path, db_name="filesystem.db"):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM file_info WHERE file_path = ?", (id,))
+    cursor.execute("SELECT id FROM file_info WHERE file_path = ?", (path,))
     rows = cursor.fetchall()
     connection.close()
     file_path = rows[0][0]
@@ -176,7 +178,7 @@ def delete_directory_structure(record_id, db_name="filesystem.db"):
     connection.close()
 
 
-def change_directory_structure(dir_src_path, dir_dest_path, db_name="filesystem.db"):
+def change_directory(dir_src_path, dir_dest_path, db_name="filesystem.db"):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
     cursor.execute(
@@ -187,6 +189,25 @@ def change_directory_structure(dir_src_path, dir_dest_path, db_name="filesystem.
     """,
         (dir_dest_path, dir_src_path),
     )
+    cursor.execute(
+        """
+        SELECT file_path FROM file_info WHERE file_path LIKE ?
+        """,
+        (f"{dir_src_path}%",),
+    )
+    rows = cursor.fetchall()
+
+    # 각 레코드에 대해 dir_path를 업데이트합니다.
+    for (file_path,) in rows:
+        new_file_path = file_path.replace(dir_src_path, dir_dest_path, 1)
+        cursor.execute(
+            """
+            UPDATE file_info
+            SET file_path = ?
+            WHERE file_path = ?
+            """,
+            (new_file_path, file_path),
+        )
     connection.commit()
     connection.close()
 
