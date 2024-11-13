@@ -128,53 +128,61 @@ def start_command_c(root):
         print(f"Error initializing database: {e}")
         return
 
-    # C 코드에서 파일 데이터 가져오기
-    file_data_list = get_all_file_data(root)
+    id = 1
 
-    if file_data_list is None:
-        print("Error: file_data_list is NULL.")
+    # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
+    try:
+        initialize_vector_db(root + ".db")
+    except Exception as e:
+        print(f"Error initializing vector DB for root: {e}")
         return
 
-    id = 1
-    added_directories = set()  # 이미 추가된 디렉토리 경로를 저장하는 집합
+    # print(root)
+    insert_file_info(id, root, 1, "filesystem.db")
 
-    # 데이터베이스에 파일 정보 삽입
-    for file_data in file_data_list:
-        path = file_data[0]  # 절대 경로
-        name = file_data[1]  # 파일 이름
-        is_dir = False  # file_data_list에는 파일만 포함되므로 기본적으로 False
+    # 루트의 부모 디렉토리 찾기
+    last_slash_index = root.rfind("/")
+    if last_slash_index != -1:
+        root_parent = root[:last_slash_index]
 
-        # 파일이 속한 디렉토리 경로 확인
-        dirpath = os.path.dirname(path)
+    insert_directory_structure(id, root, root_parent, "filesystem.db")
+    id += 1
 
-        # 비밀 파일 제외, db 파일 제외
-        if name.startswith(".") or name.endswith(".db"):
-            continue
-
-        # 디렉토리가 추가되지 않았다면 추가
-        if dirpath not in added_directories:
-            parent_dir = os.path.dirname(dirpath) if dirpath != root else None
-            insert_file_info(id, dirpath, 1, "filesystem.db")
-            insert_directory_structure(id, dirpath, parent_dir, "filesystem.db")
+    # 디렉터리 재귀 탐색
+    for dirpath, dirnames, filenames in os.walk(root):
+        # 디렉터리 정보 삽입
+        for dirname in dirnames:
+            full_path = os.path.join(dirpath, dirname)
 
             try:
-                initialize_vector_db(dirpath + ".db")  # 디렉토리와 대응되는 Vector DB 생성
+                initialize_vector_db(full_path + ".db")
             except Exception as e:
                 print(f"Error initializing vector DB for directory: {e}")
                 continue
 
-            added_directories.add(dirpath)  # 디렉토리 경로를 집합에 추가
+            print(f"디렉토리 경로: {full_path}")
+            insert_file_info(id, full_path, 1, "filesystem.db")
+            insert_directory_structure(id, full_path, dirpath, "filesystem.db")
             id += 1
 
-        # 파일 정보 삽입
-        insert_file_info(id, path, is_dir, "filesystem.db")
+        # 파일 정보 삽입 및 벡터 DB에 저장
+        for filename in filenames:
+            # 비밀 파일(파일 이름이 .으로 시작)과 .db 파일 제외
+            if filename.startswith(".") or filename.endswith(".db"):
+                continue
 
+            full_path = os.path.join(dirpath, filename)
+            print(f"Embedding 하는 파일의 절대 경로: {full_path}")
 
-        # 파일 내용을 벡터화하여 해당 디렉토리의 Vector DB에 저장
-        file_chunks = file_data[2:]
-        print(f"Embedding 하는 파일의 절대 경로: {path}")
-        save(dirpath + ".db", id, file_chunks)
-        id += 1
+            # 파일 정보 삽입
+            insert_file_info(id, full_path, 0, "filesystem.db")
+
+            file_chunks = get_file_data(full_path)
+
+            # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+            save(dirpath + ".db", id, file_chunks[2:])
+
+            id += 1
 
     # 종료 시간 기록
     end_time = time.time()
@@ -184,5 +192,5 @@ def start_command_c(root):
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
 
 if __name__ == "__main__":
-#    start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
-    start_command_c("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+   start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+   # start_command_c("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")

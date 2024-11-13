@@ -194,29 +194,61 @@ def start_command_c(root):
         print(f"Error initializing database: {e}")
         return
 
-    # C 코드에서 디렉토리 데이터 가져오기
-    file_data_list = get_all_file_data(root)
-
     id = 1
-    # 데이터베이스에 파일 및 디렉토리 정보 삽입
-    for file_data in file_data_list:
-        path = file_data[0]  # 전체 경로
-        name = file_data[1]  # 파일 또는 디렉토리 이름
-        is_dir = file_data[2] == b"True"  # 디렉토리 여부 확인
 
-        print(is_dir)
-        # 디렉토리인지 파일인지에 따라 테이블에 삽입
-        if is_dir:
-            # directory_structure 테이블에 디렉토리 정보 삽입
-            parent_dir = os.path.dirname(path) if path != root else None
-            print(path)
-            insert_file_info(id, path, is_dir, "filesystem.db")
-            insert_directory_structure(id, path, parent_dir, "filesystem.db")
+    # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
+    try:
+        initialize_vector_db(root + ".db")
+    except Exception as e:
+        print(f"Error initializing vector DB for root: {e}")
+        return
 
-        else:
-            print(path)
-            insert_file_info(id, path, is_dir, "filesystem.db")
-        id += 1
+    # print(root)
+    insert_file_info(id, root, 1, "filesystem.db")
+
+    # 루트의 부모 디렉토리 찾기
+    last_slash_index = root.rfind("/")
+    if last_slash_index != -1:
+        root_parent = root[:last_slash_index]
+
+    insert_directory_structure(id, root, root_parent, "filesystem.db")
+    id += 1
+
+    # 디렉터리 재귀 탐색
+    for dirpath, dirnames, filenames in os.walk(root):
+        # 디렉터리 정보 삽입
+        for dirname in dirnames:
+            full_path = os.path.join(dirpath, dirname)
+
+            try:
+                initialize_vector_db(full_path + ".db")
+            except Exception as e:
+                print(f"Error initializing vector DB for directory: {e}")
+                continue
+
+            print(f"디렉토리 경로: {full_path}")
+            insert_file_info(id, full_path, 1, "filesystem.db")
+            insert_directory_structure(id, full_path, dirpath, "filesystem.db")
+            id += 1
+
+        # 파일 정보 삽입 및 벡터 DB에 저장
+        for filename in filenames:
+            # 비밀 파일(파일 이름이 .으로 시작)과 .db 파일 제외
+            if filename.startswith(".") or filename.endswith(".db"):
+                continue
+
+            full_path = os.path.join(dirpath, filename)
+            print(f"Embedding 하는 파일의 절대 경로: {full_path}")
+
+            # 파일 정보 삽입
+            insert_file_info(id, full_path, 0, "filesystem.db")
+
+            file_chunks = get_file_data(full_path)
+
+            # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+            save(dirpath + ".db", id, file_chunks[2:])
+
+            id += 1
 
     # 종료 시간 기록
     end_time = time.time()
@@ -224,7 +256,6 @@ def start_command_c(root):
     # 걸린 시간 계산
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
-
 
 def shell(root_dir: str):
     global link_dir
@@ -235,8 +266,8 @@ def shell(root_dir: str):
     # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화
     try:
         # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
-        start_command_python(root_dir)
-        # start_command_c(root)
+        # start_command_python(root_dir)
+        start_command_c(root_dir)
         # get_file_data(root)
     except IndexError:
         print("start: missing argument")
