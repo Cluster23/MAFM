@@ -4,7 +4,7 @@ import psutil
 
 # 모델을 전역 변수로 초기화하여 재사용
 model = None
-
+os.environ['TOKENIZERS_PARALLELISM'] = "false"
 
 def initialize_model():
     global model

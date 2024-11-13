@@ -13,22 +13,11 @@ import gc
 
 from .sqlite import get_path_by_id
 
-# MilvusClient 전역 클라이언트 객체 생성
-client_cache = {}
-
 
 def initialize_vector_db(db_name):
-    global client_cache
-
-    # 이미 연결된 클라이언트가 있다면 재사용
-    if db_name in client_cache:
-        print(f"Reusing existing client for {db_name}")
-        return client_cache[db_name]
-
     try:
         # Milvus에 연결
         client = MilvusClient(db_name)
-        client_cache[db_name] = client  # 클라이언트를 캐시에 저장
 
         print(f"Connected to {db_name}")
 
@@ -41,6 +30,7 @@ def initialize_vector_db(db_name):
             dimension=384,  # stella는 1024 스노우플레이크는 384
         )
 
+        client.close()
         return client
 
     except Exception as e:
@@ -48,14 +38,7 @@ def initialize_vector_db(db_name):
         return None
 
 def delete_vector_db(db_name):
-    global client_cache
-
-    # 캐시에서 클라이언트를 가져옴
-    if db_name not in client_cache:
-        print(f"Client for {db_name} does not exist.")
-        return
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
 
     # 컬렉션이 존재하는지 확인
     if client.has_collection(collection_name="demo_collection"):
@@ -70,16 +53,10 @@ def delete_vector_db(db_name):
     else:
         print(f"Collection 'demo_collection' does not exist in {db_name}")
 
+    client.close()
 
 def save(db_name, id, queries):
-    global client_cache
-
-    # 캐시에서 클라이언트를 가져옴
-    if db_name not in client_cache:
-        print(f"Client for {db_name} does not exist.")
-        return
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
 
     # 컬렉션이 존재하는지 확인
     if not client.has_collection(collection_name="demo_collection"):
@@ -114,15 +91,11 @@ def save(db_name, id, queries):
 
     except Exception as e:
         print(f"Error occurred during saving data to Milvus: {e}")
+    client.close()
 
 
 def insert_file_embedding(file_data, db_name):
-    global client_cache
-    if db_name not in client_cache:
-        print(f"Client for {db_name} does not exist.")
-        return
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
     if not client.has_collection(collection_name="demo_collection"):
         print(f"Collection 'demo_collection' does not exist in {db_name}")
         return
@@ -140,19 +113,13 @@ def insert_file_embedding(file_data, db_name):
     except Exception as e:
         print(f"Error occurred during saving data to Milvus: {e}")
 
+    client.close()
+
 
 # input: query들의 리스트임에 유의!!
 # Output: input의 query와 가장 가까운 2개의 파일 경로
 def search(db_name, query_list):
-
-    global client_cache
-
-    # 캐시에서 클라이언트를 가져옴
-    if db_name not in client_cache:
-        print(f"Client for {db_name} does not exist.")
-        return
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
 
     # 컬렉션이 존재하는지 확인
     if not client.has_collection(collection_name="demo_collection"):
@@ -178,18 +145,12 @@ def search(db_name, query_list):
     path_list = [get_path_by_id(id, "filesystem.db") for id in id_list]
 
     print(path_list)
+    client.close()
     return path_list
 
 
 def find_by_id(search_id, db_name):
-    global client_cache
-
-    # Check if client exists in the cache
-    if db_name not in client_cache:
-        print(f"Client for {db_name} does not exist.")
-        return
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
 
     collection_name = "demo_collection"
 
@@ -205,16 +166,12 @@ def find_by_id(search_id, db_name):
         print(f"No results found for ID: {search_id}")
         return
 
+    client.close()
     return res
 
 
 def remove_by_id(remove_id, db_name):
-    global client_cache
-
-    if db_name not in client_cache:
-        raise Exception(f"Client for {db_name} does not exist.")
-
-    client = client_cache[db_name]
+    client = MilvusClient(db_name)
 
     collection_name = "demo_collection"
     if not client.has_collection(collection_name):
@@ -223,4 +180,6 @@ def remove_by_id(remove_id, db_name):
     res = client.delete(collection_name=collection_name, filter=f"id in [{remove_id}]")
 
     print(f"Deleted records with ID: {remove_id}")
+
+    client.close()
     return res

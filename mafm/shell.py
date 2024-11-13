@@ -2,22 +2,15 @@ import os
 import subprocess
 import tempfile
 import time
-from rag.fileops import make_soft_links, get_file_data, get_all_file_data
+from rag.fileops import make_soft_links, get_file_data
 from rag.sqlite import (
     initialize_database,
     insert_file_info,
     insert_directory_structure,
-    get_file_info,
-    get_directory_structure,
-    update_file_info,
-    update_directory_structure,
-    delete_file_info,
-    delete_directory_structure,
 )
 from rag.vectorDb import (
     initialize_vector_db,
     save,
-    search,
 )
 from rag.embedding import initialize_model
 from agent.graph import graph
@@ -171,6 +164,7 @@ def shell(root_dir: str):
     global link_dir
 
     initialize_model()  # embedding 모델 초기화
+    print("model")
 
     # root 위치에서부터 MAFM을 활성화
     # /Users 아래에 존재하는 모든 디렉토리들을 관리할 수 있으면 좋겠지만, 일단 프로토타입이기 때문에 depth를 최소화

@@ -1,0 +1,17 @@
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/Users/Ruffles/anaconda3/lib/python3.11/threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/observers/api.py", line 213, in run
+    self.dispatch_events(self.event_queue)
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/observers/api.py", line 391, in dispatch_events
+    handler.dispatch(event)
+  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/events.py", line 217, in dispatch
+    getattr(self, f"on_{event.event_type}")(event)
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 57, in on_deleted
+    id = get_id_by_path(file_path, "filesystem.db")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/sqlite.py", line 109, in get_id_by_path
+    file_path = rows[0][0]
+                ~~~~^^^
+IndexError: list index out of range

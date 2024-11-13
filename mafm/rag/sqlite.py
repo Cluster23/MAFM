@@ -54,7 +54,7 @@ def insert_file_info(file_path, is_dir, db_name="filesystem.db"):
     cursor.execute(
         """
         INSERT INTO file_info (file_path, is_dir)
-        VALUES (?, ?, ?)
+        VALUES (?, ?)
         """,
         (file_path, is_dir),
     )
@@ -105,6 +105,7 @@ def get_id_by_path(path, db_name="filesystem.db"):
     cursor.execute("SELECT id FROM file_info WHERE file_path = ?", (path,))
     rows = cursor.fetchall()
     connection.close()
+    print(rows)
     file_path = rows[0][0]
     return file_path
 
