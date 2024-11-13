@@ -63,9 +63,14 @@ class FileEventHandler(FileSystemEventHandler):
         """파일 수정 이벤트 처리"""
         if event.is_directory:
             return
-
-        print(f"Modified file: {event.src_path}")
-        self.process_file(event.src_path)
+        file_src_path = event.src_path
+        dir_path = os.path.dirname(file_src_path)
+        dir_name = os.path.basename(dir_path)
+        db_name = dir_path + "/" + dir_name + ".db"
+        id = get_id_by_path(file_src_path, "filesystem.db")
+        remove_by_id(id, db_name)
+        save(db_name, id, get_file_data(file_src_path)[2:])
+        insert_file_info(file_src_path, 0, "filesystem.db")
 
     def on_moved(self, event):
         """파일 이동 이벤트 처리"""

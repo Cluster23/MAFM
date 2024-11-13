@@ -164,20 +164,6 @@ def delete_file_info(record_id, db_name="filesystem.db"):
     connection.close()
 
 
-def delete_directory_structure(record_id, db_name="filesystem.db"):
-    connection = sqlite3.connect(db_name)
-    cursor = connection.cursor()
-    cursor.execute(
-        """
-        DELETE FROM directory_structure
-        WHERE record_id = ?
-    """,
-        (record_id,),
-    )
-    connection.commit()
-    connection.close()
-
-
 def change_directory_path(dir_src_path, dir_dest_path, db_name="filesystem.db"):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
@@ -274,7 +260,7 @@ def delete_directory_and_subdirectories(dir_path):
         DELETE FROM directory_structure
         WHERE dir_path LIKE ?
         """,
-        (f"{dir_path}%",)
+        (f"{dir_path}%",),
     )
 
     # file_info 테이블에서 file_path가 dir_path로 시작하는 모든 레코드 삭제
@@ -283,7 +269,7 @@ def delete_directory_and_subdirectories(dir_path):
         DELETE FROM file_info
         WHERE file_path LIKE ?
         """,
-        (f"{dir_path}%",)
+        (f"{dir_path}%",),
     )
 
     # 변경 사항을 커밋
