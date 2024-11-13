@@ -16,7 +16,9 @@ class AgentState(TypedDict):
 def graph(directory_path: str, prompt: str) -> List[str]:
     human_input = HumanMessage(content=prompt)
 
-    members = get_directories_by_depth(1) # get_directories_by_depth 고쳐야함. 지금은 항상 filesystem.db 기준임
+    members = get_directories_by_depth(
+        1
+    )  # get_directories_by_depth 고쳐야함. 지금은 항상 filesystem.db 기준임
     output_dict = []
     print(members, human_input)
     # graph 생성
@@ -40,10 +42,11 @@ def graph(directory_path: str, prompt: str) -> List[str]:
     workflow.add_edge("analyst", END)
     app = workflow.compile()
 
-    # from IPython.display import Image, display
-    # png_data = app.get_graph().draw_mermaid_png()
-    # with open("graph_image.png", "wb") as file:
-    #     file.write(png_data)
+    from IPython.display import Image, display
+
+    png_data = app.get_graph().draw_mermaid_png()
+    with open("graph_image.png", "wb") as file:
+        file.write(png_data)
     previous_output = None
     for s in app.stream(
         {"messages": [human_input]},

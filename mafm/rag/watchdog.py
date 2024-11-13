@@ -2,10 +2,23 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from pathlib import Path
-from .sqlite import insert_file_info, insert_directory_structure, update_file_info, delete_directory_and_subdirectories
+from .vectorDb import save
+from .sqlite import (
+    insert_file_info,
+    insert_directory_structure,
+    update_file_info,
+    get_id_by_path,
+    change_directory_path,
+    change_file_path,
+)
 from .embedding import embedding, initialize_model
 from ..rag.fileops import get_file_data
-from .vectorDb import save, delete_vector_db, initialize_vector_db
+from .vectorDb import (
+    initialize_vector_db,
+    find_by_id,
+    insert_file_embedding,
+    remove_by_id,
+)
 import os
 
 
@@ -44,11 +57,14 @@ class FileEventHandler(FileSystemEventHandler):
     def on_moved(self, event):
         """파일 이동 이벤트 처리"""
         if event.is_directory:
+            change_directory_path(
+                event.dir_src_path, event.dir_dest_path, "filesystem.db"
+            )
             return
 
         print(f"Moved file: from {event.src_path} to {event.dest_path}")
         # DB에 저장된 경로를 새로운 경로로 업데이트
-        self.process_file(event.dest_path)
+        self.move_file(event.src_path, event.dest_path)
 
     def on_created(self, event):
         """새로운 파일이 생겼을 경우"""
@@ -74,9 +90,19 @@ class FileEventHandler(FileSystemEventHandler):
         insert_file_info(absolute_file_path, 0, "filesystem.db")
 
         file_chunks = get_file_data(absolute_file_path)
-
         # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
         save(dirpath + "/" + dirname + ".db", id, file_chunks[2:])
+
+    def move_file(self, file_src_path, file_dest_path):
+        """파일 처리 및 벡터 DB에 저장"""
+        dir_path = os.path.dirname(file_src_path)
+        dir_name = os.path.basename(dir_path)
+        db_name = dir_path + "/" + dir_name + ".db"
+        id = get_id_by_path(file_src_path, "filesystem.db")
+        file_data = find_by_id(id, db_name)
+        insert_file_embedding(file_data, db_name)
+        remove_by_id(id, db_name)
+        change_file_path(file_src_path, file_dest_path, db_name)
 
 
 def start_watchdog(root_dir, db_path):
@@ -90,7 +116,6 @@ def start_watchdog(root_dir, db_path):
 
     # 파일 시스템 모니터링 시작
     observer.start()
-    print(f"Started watchdog for {root_dir}")
 
     try:
         while True:
@@ -98,9 +123,3 @@ def start_watchdog(root_dir, db_path):
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
-
-
-if __name__ == "__main__":
-    root_directory = "/path/to/your/root"
-    db_path = root_directory + ".db"
-    start_watchdog(root_directory, db_path)

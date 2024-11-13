@@ -116,6 +116,31 @@ def save(db_name, id, queries):
         print(f"Error occurred during saving data to Milvus: {e}")
 
 
+def insert_file_embedding(file_data, db_name):
+    global client_cache
+    if db_name not in client_cache:
+        print(f"Client for {db_name} does not exist.")
+        return
+
+    client = client_cache[db_name]
+    if not client.has_collection(collection_name="demo_collection"):
+        print(f"Collection 'demo_collection' does not exist in {db_name}")
+        return
+
+    try:
+        # 데이터 삽입
+        res = client.insert(collection_name="demo_collection", data=file_data)
+
+    except MemoryError as me:
+        print(f"MemoryError: {me}")
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+
+    except Exception as e:
+        print(f"Error occurred during saving data to Milvus: {e}")
+
+
 # input: query들의 리스트임에 유의!!
 # Output: input의 query와 가장 가까운 2개의 파일 경로
 def search(db_name, query_list):
@@ -154,3 +179,48 @@ def search(db_name, query_list):
 
     print(path_list)
     return path_list
+
+
+def find_by_id(search_id, db_name):
+    global client_cache
+
+    # Check if client exists in the cache
+    if db_name not in client_cache:
+        print(f"Client for {db_name} does not exist.")
+        return
+
+    client = client_cache[db_name]
+
+    collection_name = "demo_collection"
+
+    # Check if the collection exists using the client
+    if not client.has_collection(collection_name):
+        print(f"Collection '{collection_name}' does not exist in {db_name}")
+        return
+
+    # Perform the query directly using the client
+    res = client.query(collection_name=collection_name, filter=f"id in [{search_id}]")
+
+    if not res:
+        print(f"No results found for ID: {search_id}")
+        return
+
+    return res
+
+
+def remove_by_id(remove_id, db_name):
+    global client_cache
+
+    if db_name not in client_cache:
+        raise Exception(f"Client for {db_name} does not exist.")
+
+    client = client_cache[db_name]
+
+    collection_name = "demo_collection"
+    if not client.has_collection(collection_name):
+        raise Exception(f"Collection '{collection_name}' does not exist in {db_name}")
+
+    res = client.delete(collection_name=collection_name, filter=f"id in [{remove_id}]")
+
+    print(f"Deleted records with ID: {remove_id}")
+    return res

@@ -129,7 +129,7 @@ def start_command_c(root):
         # 디렉터리 정보 삽입
         for dirname in dirnames:
             full_path = os.path.join(dirpath, dirname)
-
+            print(f"디렉토리 경로: {full_path}")
             try:
                 initialize_vector_db(full_path + "/" + dirname + ".db")
             except Exception as e:
@@ -165,6 +165,7 @@ def start_command_c(root):
     # 걸린 시간 계산
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
+
 
 def shell(root_dir: str):
     global link_dir

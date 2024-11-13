@@ -22,7 +22,10 @@ from rag.vectorDb import (
 from rag.embedding import initialize_model
 from agent.graph import graph
 import ctypes
+
 link_dir = None
+
+
 def start_command_python(root):
     # 시작 시간 기록
     start_time = time.time()
@@ -153,7 +156,7 @@ def start_command_c(root):
         # 디렉터리 정보 삽입
         for dirname in dirnames:
             full_path = os.path.join(dirpath, dirname)
-
+            print(full_path)
             try:
                 initialize_vector_db(full_path + ".db")
             except Exception as e:
@@ -191,6 +194,7 @@ def start_command_c(root):
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
 
+
 if __name__ == "__main__":
-   start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
-   # start_command_c("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+    start_command_python("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")
+    # start_command_c("/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test")

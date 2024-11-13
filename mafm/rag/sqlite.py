@@ -178,7 +178,7 @@ def delete_directory_structure(record_id, db_name="filesystem.db"):
     connection.close()
 
 
-def change_directory(dir_src_path, dir_dest_path, db_name="filesystem.db"):
+def change_directory_path(dir_src_path, dir_dest_path, db_name="filesystem.db"):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
     cursor.execute(
@@ -208,6 +208,21 @@ def change_directory(dir_src_path, dir_dest_path, db_name="filesystem.db"):
             """,
             (new_file_path, file_path),
         )
+    connection.commit()
+    connection.close()
+
+
+def change_file_path(file_src_path, file_dest_path, db_name):
+    connection = sqlite3.connect(db_name)
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        UPDATE file_info
+        SET file_path = ?
+        WHERE file_path = ?
+        """,
+        (file_dest_path, file_src_path),
+    )
     connection.commit()
     connection.close()
 
