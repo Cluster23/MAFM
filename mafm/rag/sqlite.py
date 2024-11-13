@@ -249,8 +249,9 @@ def get_directories_by_depth(depth):
         return []
 
 
-def delete_directory_and_subdirectories(conn, dir_path):
-    cursor = conn.cursor()
+def delete_directory_and_subdirectories(dir_path):
+    connection = sqlite3.connect("filesystem.db")
+    cursor = connection.cursor()
 
     # directory_structure 테이블에서 dir_path가 포함된 모든 레코드 삭제
     cursor.execute(

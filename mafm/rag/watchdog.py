@@ -18,13 +18,14 @@ class FileEventHandler(FileSystemEventHandler):
         """파일 삭제 이벤트 처리"""
         if event.is_directory:
             # 디렉토리인 경우 -> 벡터 DB 자체를 삭제하고 SQLite에서 해당 디렉토리와 관련 데이터를 모두 삭제
-            dirpath = event.src_path
-            dirname = os.path.basename(dirpath)
-            db_name = dirpath + "/" + dirname + ".db"
+            dir_path = event.src_path
+            dir_name = os.path.basename(dir_path)
+            db_name = dir_path + "/" + dir_name + ".db"
             delete_vector_db(db_name)
 
             # SQLite에서도 해당 디렉토리 관련 데이터 삭제
-            # 필요한 경우, 적절한 함수 호출로 SQLite 데이터 삭제 로직을 추가
+            delete_directory_and_subdirectories(dir_path)
+
             print(f"Deleted directory and associated VectorDB: {db_name}")
             return
 
