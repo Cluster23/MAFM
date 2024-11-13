@@ -3,8 +3,10 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from pathlib import Path
 from .vectorDb import save
-from .sqlite import insert_file_info, update_file_info
-from embedding import embedding, initialize_model
+from .sqlite import insert_file_info, insert_directory_structure, update_file_info
+from .embedding import embedding, initialize_model
+from ..rag.fileops import get_file_data
+from .vectorDb import initialize_vector_db
 import os
 
 
@@ -30,27 +32,33 @@ class FileEventHandler(FileSystemEventHandler):
         # DB에 저장된 경로를 새로운 경로로 업데이트
         self.process_file(event.dest_path)
 
-    def process_file(self, file_path):
-        """파일 처리 및 벡터 DB에 저장"""
-        last_modified_time = os.path.getmtime(file_path)
+    def on_created(self, event, absolute_file_path):
+        """새로운 파일이 생겼을 경우"""
 
-        # 파일 내용을 500바이트씩 읽기
-        file_chunks = []
-        try:
-            with open(file_path, "rb") as file:
-                while True:
-                    chunk = file.read(500)
-                    if not chunk:
-                        break
-                    file_chunks.append(chunk.decode("utf-8", errors="ignore"))
-        except Exception as e:
-            print(f"Failed to read file data for {file_path}: {e}")
+        dirname = os.path.dirname(absolute_file_path)
+        dirpath = Path(dirname)
+
+        if event.is_directory:
+            # 생성된 것이 디렉토리인 경우 -> 새로운 VectorDB를 생성 후 경로를 SQLite에 저장
+            try:
+                initialize_vector_db(dirpath + "/" + dirname + ".db")
+            except Exception as e:
+                print(f"Error initializing vector DB for directory: {e}")
+
+            id = insert_file_info(absolute_file_path, 1, "filesystem.db")
+            insert_directory_structure(id, dirpath, dirpath.parent, "filesystem.db")
             return
 
-        # 임베딩 및 벡터 DB 저장
-        embedding_result = embedding(file_chunks)
-        save(self.db_path, Path(file_path).name, embedding_result)
-        update_file_info(file_path, last_modified_time, "filesystem.db")
+        """파일 생성 로직"""
+        last_modified_time = os.path.getmtime(absolute_file_path)
+
+        # 파일 정보 삽입
+        insert_file_info(absolute_file_path, 0, "filesystem.db")
+
+        file_chunks = get_file_data(absolute_file_path)
+
+        # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+        save(dirpath + "/" + dirname + ".db", id, file_chunks[2:])
 
 
 def start_watchdog(root_dir, db_path):

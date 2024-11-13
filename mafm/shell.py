@@ -98,14 +98,14 @@ def start_command_c(root):
     # 시작 시간 기록
     start_time = time.time()
 
+    id = 0
+
     # SQLite DB 연결 및 초기화
     try:
         initialize_database("filesystem.db")
     except Exception as e:
         print(f"Error initializing database: {e}")
         return
-
-    id = 1
 
     # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
     try:
@@ -115,7 +115,7 @@ def start_command_c(root):
         return
 
     # print(root)
-    insert_file_info(id, root, 1, "filesystem.db")
+    id = insert_file_info(root, 1, "filesystem.db")
 
     # 루트의 부모 디렉토리 찾기
     last_slash_index = root.rfind("/")
@@ -123,7 +123,6 @@ def start_command_c(root):
         root_parent = root[:last_slash_index]
 
     insert_directory_structure(id, root, root_parent, "filesystem.db")
-    id += 1
 
     # 디렉터리 재귀 탐색
     for dirpath, dirnames, filenames in os.walk(root):
@@ -138,9 +137,8 @@ def start_command_c(root):
                 continue
 
             print(f"디렉토리 경로: {full_path}")
-            insert_file_info(id, full_path, 1, "filesystem.db")
+            id = insert_file_info(full_path, 1, "filesystem.db")
             insert_directory_structure(id, full_path, dirpath, "filesystem.db")
-            id += 1
 
         # 파일 정보 삽입 및 벡터 DB에 저장
         for filename in filenames:
@@ -152,7 +150,7 @@ def start_command_c(root):
             print(f"Embedding 하는 파일의 절대 경로: {full_path}")
 
             # 파일 정보 삽입
-            insert_file_info(id, full_path, 0, "filesystem.db")
+            insert_file_info(full_path, 0, "filesystem.db")
 
             file_chunks = get_file_data(full_path)
 
@@ -160,8 +158,6 @@ def start_command_c(root):
             # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
             dirname = dirpath.split("/")[-1]
             save(dirpath + "/" + dirname + ".db", id, file_chunks[2:])
-
-            id += 1
 
     # 종료 시간 기록
     end_time = time.time()
