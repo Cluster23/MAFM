@@ -1,115 +1,71 @@
 모델이 성공적으로 초기화되었습니다.
 Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/MAFM_test.db
+디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/temp
+Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/temp/temp.db
 디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download
 Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/download.db
-디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download
 디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report
 Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/report.db
-디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report
 디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
 Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db
-디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/document_download.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [6, 6, 6, 6]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/.download.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/software_download2.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [7, 7, 7, 7]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/.download.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/software_download.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [8, 8, 8, 8]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/.download.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/media_download.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [9, 9, 9, 9]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/.download.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/scientific_report.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [10, 10, 10, 10]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/financial_report.txt
-{'insert_count': 4, 'ids': [4, 4, 4, 4]}
+{'insert_count': 4, 'ids': [11, 11, 11, 11]}
+No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
+Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/협력 자율 주행을 위한 V2X 통신기술.pdf
+{'insert_count': 23, 'ids': [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/test.txt
-{'insert_count': 2, 'ids': [4, 4]}
+{'insert_count': 2, 'ids': [13, 13]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/marketing_report.txt
-{'insert_count': 3, 'ids': [4, 4, 4]}
+{'insert_count': 3, 'ids': [14, 14, 14]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
+디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/temp
+Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/temp/temp.db
 디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code
 Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db
-디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/javascript_coding.txt
-{'insert_count': 4, 'ids': [13, 13, 13, 13]}
+{'insert_count': 4, 'ids': [17, 17, 17, 17]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/python_coding.txt
-{'insert_count': 4, 'ids': [13, 13, 13, 13]}
+{'insert_count': 4, 'ids': [18, 18, 18, 18]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/python_coding 복사본.txt
-{'insert_count': 4, 'ids': [13, 13, 13, 13]}
+{'insert_count': 4, 'ids': [19, 19, 19, 19]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/algorithm_coding.txt
-{'insert_count': 5, 'ids': [13, 13, 13, 13, 13]}
+{'insert_count': 5, 'ids': [20, 20, 20, 20, 20]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
+디렉토리 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/temp
+Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/temp/temp.db
 Embedding 하는 파일의 절대 경로: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/abc.txt
-{'insert_count': 1, 'ids': [13]}
+{'insert_count': 1, 'ids': [22]}
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/.test_code.db.lock
-작업에 걸린 시간: 12.7463 초
+작업에 걸린 시간: 24.6404 초
 --created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
+ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
 --created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/.test_code.db.lock
---created--
-created directory
-Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db
-E20241114 18:44:44.884827 8011780 collection_meta.cpp:148] [SERVER][CreateIndex][] Add index failed, err: database is locked
-RPC error: [create_index], <MilvusException: (code=5, message=: internal error)>, <Time:{'RPC start': '2024-11-14 18:44:44.882052', 'RPC error': '2024-11-14 18:44:44.887422'}>
-Failed to create an index on collection: demo_collection
-Error initializing vector DB for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db: <MilvusException: (code=5, message=: internal error)>
-No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/.test_code.db.lock
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/test_code/test_code.db-journal
---created--
-created directory
-Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db
-E20241114 18:47:54.256953 8011503 collection_data.cpp:67] [SERVER][DropCollection][] Drop collection demo_collection failed, errs: no such table: demo_collection
-E20241114 18:47:54.261556 8011503 storage.cpp:87] [SERVER][DropCollection][] Delete collection: demo_collection's data failed
-RPC error: [drop_collection], <MilvusException: (code=5, message=: internal error)>, <Time:{'RPC start': '2024-11-14 18:47:54.254590', 'RPC error': '2024-11-14 18:47:54.262049'}>
-Error initializing vector DB for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db: <MilvusException: (code=5, message=: internal error)>
-No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/.coding.db.lock
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db-journal
---created--
-created directory
-Connected to /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/MAFM_test.db
-No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/.MAFM_test.db.lock
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/MAFM_test.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/MAFM_test.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/MAFM_test.db-journal
---created--
-created file
-[(25,), (26,)]
-{'insert_count': 3, 'ids': [25, 25, 25]}
-No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
-Created file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/marketing_report2.txt
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/report.db-journal
---created--
-ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/report.db-journal
+ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/.MAFM_test.db.lock
 --deleted--
-deleting: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/marketing_report2.txt
-[(25,), (26,)]
-E20241114 18:53:17.340539 8011449 collection_data.cpp:133] [SERVER][Delete][] Delete data failed, errs: database is locked
-Deleted records with ID: 25
+deleting: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/test.txt
+[(13,)]
+Deleted records with ID: 13
 No lock file found for /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/.report.db.lock
-Deleted file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/marketing_report2.txt
+Deleted file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/test.txt
 --created--
 ignore deleted: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/report/report.db-journal

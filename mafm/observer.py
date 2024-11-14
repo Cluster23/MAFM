@@ -17,12 +17,35 @@ from rag.embedding import embedding, initialize_model
 from rag.fileops import get_file_data
 from rag.vectorDb import (
     initialize_vector_db,
+    insert_file_embedding,
     find_by_id,
     remove_by_id,
     delete_vector_db,
 )
 from collections import defaultdict
+import pdfplumber
+from docx import Document
 
+
+def read_pdf(file_path):
+    """PDF 파일을 읽어서 텍스트로 변환하는 함수"""
+    text = ""
+    with pdfplumber.open(file_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() + "\n"
+    return text
+
+def read_word(file_path):
+    """Word 파일을 읽어서 텍스트로 변환하는 함수"""
+    text = ""
+    doc = Document(file_path)
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + "\n"
+    return text
+
+def split_text_into_chunks(text, chunk_size=500):
+    """텍스트를 주어진 크기의 청크 배열로 분할하는 함수"""
+    return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
 class FileEventHandler(FileSystemEventHandler):
     """파일 시스템 이벤트 핸들러 클래스"""
@@ -129,11 +152,25 @@ class FileEventHandler(FileSystemEventHandler):
             insert_file_info(
                 absolute_file_path, 0, "filesystem.db"
             )  # 파일 정보 DB에 추가
-            file_chunks = get_file_data(absolute_file_path)
+
+            # 파일 형식에 따라 데이터를 읽고 500바이트 크기의 배열로 분할
+            if absolute_file_path.endswith(".pdf"):
+                text_content = read_pdf(absolute_file_path)
+                text_chunks = split_text_into_chunks(text_content)
+            elif absolute_file_path.endswith(".docx"):
+                text_content = read_word(absolute_file_path)
+                text_chunks = split_text_into_chunks(text_content)
+            else:
+                # 일반 텍스트 파일일 경우
+                file_chunks = get_file_data(absolute_file_path)
+                text_chunks = file_chunks[2:]  # 필요한 데이터 조정
+
+
+            # 벡터 DB에 저장
             save(
                 dirpath + "/" + dirname + ".db",
                 get_id_by_path(absolute_file_path, "filesystem.db"),
-                file_chunks[2:],
+                text_chunks,
             )
             print(f"Created file: {event.src_path}")
 
@@ -153,8 +190,6 @@ def start_command_c(root):
     # 시작 시간 기록
     start_time = time.time()
 
-    id = 0
-
     # SQLite DB 연결 및 초기화
     try:
         initialize_database("filesystem.db")
@@ -162,14 +197,13 @@ def start_command_c(root):
         print(f"Error initializing database: {e}")
         return
 
-    # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
+    # root 디렉토리의 벡터 DB 초기화
     try:
         initialize_vector_db(root + "/" + os.path.basename(root) + ".db")
     except Exception as e:
         print(f"Error initializing vector DB for root: {e}")
         return
 
-    # print(root)
     id = insert_file_info(root, 1, "filesystem.db")
 
     # 루트의 부모 디렉토리 찾기
@@ -181,7 +215,7 @@ def start_command_c(root):
 
     # 디렉터리 재귀 탐색
     for dirpath, dirnames, filenames in os.walk(root):
-        # 디렉터리 정보 삽입
+        # 디렉토리 정보 삽입
         for dirname in dirnames:
             full_path = os.path.join(dirpath, dirname)
             print(f"디렉토리 경로: {full_path}")
@@ -191,13 +225,12 @@ def start_command_c(root):
                 print(f"Error initializing vector DB for directory: {e}")
                 continue
 
-            print(f"디렉토리 경로: {full_path}")
             id = insert_file_info(full_path, 1, "filesystem.db")
             insert_directory_structure(id, full_path, dirpath, "filesystem.db")
 
         # 파일 정보 삽입 및 벡터 DB에 저장
         for filename in filenames:
-            # 비밀 파일(파일 이름이 .으로 시작)과 .db 파일 제외
+            # 비밀 파일과 .db 파일 제외
             if filename.startswith(".") or filename.endswith(".db"):
                 continue
 
@@ -207,11 +240,21 @@ def start_command_c(root):
             # 파일 정보 삽입
             id = insert_file_info(full_path, 0, "filesystem.db")
 
-            file_chunks = get_file_data(full_path)
+            # PDF 및 Word 파일 처리
+            if filename.endswith(".pdf"):
+                text_content = read_pdf(full_path)
+                text_chunks = split_text_into_chunks(text_content)
+            elif filename.endswith(".docx"):
+                text_content = read_word(full_path)
+                text_chunks = split_text_into_chunks(text_content)
+            else:
+                # 일반 텍스트 파일 처리
+                file_chunks = get_file_data(full_path)
+                text_chunks = file_chunks[2:]  # 필요한 데이터 조정
 
             # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
             dirname = dirpath.split("/")[-1]
-            save(dirpath + "/" + dirname + ".db", id, file_chunks[2:])
+            save(dirpath + "/" + dirname + ".db", id, text_chunks)
 
     # 종료 시간 기록
     end_time = time.time()
