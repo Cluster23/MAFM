@@ -1,32 +1,18 @@
 모델이 성공적으로 초기화되었습니다.
 --created--
-dirpath: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
-dirname: coding
+created file
 [(1,)]
-Error occurred during saving data to Milvus in '/Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db': <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
-Created file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/python_coding 복사본 2.txt
-on_modified
-on_modified
---modified--
-dir_path: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding
-db_name: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/coding/coding.db
+현재 메모리 사용량: 469.3125 MB
+['Software downloads are essential for acquiring applications directly from the internet. They include executables, updates, and patches necessary for maintaining software functionality. Secure software download platforms, such as official app stores and vendor websites, help prevent malware. Download managers can optimize download speed and allow for paused and resumed downloads, critical for large software files. Regular software updates ensure compatibility, security, and performance improvemen', 'ts, making download management a vital aspect of computer maintenance.Software downloads are essential for acquiring applications directly from the internet. They include executables, updates, and patches necessary for maintaining software functionality. Secure software download platforms, such as official app stores and vendor websites, help prevent malware. Download managers can optimize download speed and allow for paused and resumed downloads, critical for large software files. Regular softw', 'are updates ensure compatibility, security, and performance improvements, making download management a vital aspect of computer maintenance.Software downloads are essential for acquiring applications directly from the internet. They include executables, updates, and patches necessary for maintaining software functionality. Secure software download platforms, such as official app stores and vendor websites, help prevent malware. Download managers can optimize download speed and allow for paused a', 'nd resumed downloads, critical for large software files. Regular software updates ensure compatibility, security, and performance improvements, making download management a vital aspect of computer maintenance.'] embedding 실행 완료
+{'insert_count': 4, 'ids': [1, 1, 1, 1]}
+
+Created file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/software_download 복사본.txt
+--created--
+ignore created: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/download.db-journal
+--deleted--
+deleteing: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/software_download 복사본.txt
 [(1,)]
-Error occurred during remove_by_id in Milvus in '1': <ConnectionConfigException: (code=1, message=Alias should be string, but <class 'int'> is given.)>
-Exception in thread Thread-2:
-Traceback (most recent call last):
-  File "/Users/Ruffles/anaconda3/lib/python3.11/threading.py", line 1038, in _bootstrap_inner
-    self.run()
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/observers/api.py", line 213, in run
-    self.dispatch_events(self.event_queue)
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/observers/api.py", line 391, in dispatch_events
-    handler.dispatch(event)
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/watchdog/events.py", line 217, in dispatch
-    getattr(self, f"on_{event.event_type}")(event)
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/observer.py", line 89, in on_modified
-    remove_by_id(id, db_name)  # 기존 벡터 데이터 제거
-    ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/Ruffles/Projects/MAFM/MAFM/mafm/rag/vectorDb.py", line 164, in remove_by_id
-    connections.disconnect(alias=db_name)
-  File "/Users/Ruffles/Library/Caches/pypoetry/virtualenvs/mafm-gajijMCH-py3.11/lib/python3.11/site-packages/pymilvus/orm/connections.py", line 282, in disconnect
-    raise ConnectionConfigException(message=ExceptionsMessage.AliasType % type(alias))
-pymilvus.exceptions.ConnectionConfigException: <ConnectionConfigException: (code=1, message=Alias should be string, but <class 'int'> is given.)>
+Deleted records with ID: 1
+Deleted file: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/software_download 복사본.txt
+--created--
+ignore created: /Users/Ruffles/Projects/MAFM/MAFM/mafm/MAFM_test/download/download.db-journal
