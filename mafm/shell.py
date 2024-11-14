@@ -48,7 +48,7 @@ def execute_command(command, root_dir):
 
         elif cmd_parts[0] == "mlink":
             if len(cmd_parts) < 2:
-                print("mlink: missing arguments. Usage: mlink <dir_path>")
+                print("mlink: missing arguments. Usage: mlink <query>")
                 return
 
             prompt = cmd_parts[1]

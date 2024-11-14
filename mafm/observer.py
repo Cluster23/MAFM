@@ -42,7 +42,7 @@ class FileEventHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         """파일 또는 디렉토리 삭제 이벤트 처리 함수"""
         if self.is_dot_file(event.src_path) or self.is_ignored_file(event.src_path):
-            print("ignore created: " + event.src_path)
+            print("ignore deleted: " + event.src_path)
             return  # 숨김 파일과 무시할 패턴을 가진 파일은 무시
 
         print("--deleted--")
@@ -164,7 +164,7 @@ def start_command_c(root):
 
     # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
     try:
-        initialize_vector_db(root + ".db")
+        initialize_vector_db(root + "/" + os.path.basename(root) + ".db")
     except Exception as e:
         print(f"Error initializing vector DB for root: {e}")
         return

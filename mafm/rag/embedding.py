@@ -49,8 +49,6 @@ def embedding(queries):
         ):
             raise ValueError("The input to encode() must be a list of strings.")
         query_embeddings = model.encode(queries)
-        log_memory_usage()
-        print(queries, "embedding 실행 완료")
 
         return query_embeddings.tolist()
     except MemoryError as me:
@@ -58,8 +56,3 @@ def embedding(queries):
     except Exception as e:
         print(f"embedding 중 오류 발생: {e}")
         return None
-
-
-def log_memory_usage():
-    process = psutil.Process(os.getpid())
-    print(f"현재 메모리 사용량: {process.memory_info().rss / 1024 ** 2} MB")
