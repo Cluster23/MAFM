@@ -205,7 +205,7 @@ def start_command_c(root):
             print(f"Embedding 하는 파일의 절대 경로: {full_path}")
 
             # 파일 정보 삽입
-            insert_file_info(full_path, 0, "filesystem.db")
+            id = insert_file_info(full_path, 0, "filesystem.db")
 
             file_chunks = get_file_data(full_path)
 
