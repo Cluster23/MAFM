@@ -13,30 +13,31 @@ import os
 
 from rag.vectorDb import search
 
-
-class routeResponse(BaseModel):
-    messages: List[str] = Field(description="list of file path")
+global current_directory_name
 
 
 class queryResponse(BaseModel):
-    query: str = Field(description="query string")
-    directory_name: str = Field(description="directory name")
+    query: str = Field(description="query sentence")
 
 
 def get_file_list(query: queryResponse) -> List[str]:
     """
     get file list from user input
     """
-    print(
-        query.directory_name + "/" + os.path.basename(query.directory_name) + ".db",
-    )
+    global current_directory_name
+
+    print("current_directory_name: ", current_directory_name)
+    print("query: ", query)
     return search(
-        query.directory_name + "/" + os.path.basename(query.directory_name) + ".db",
+        current_directory_name + "/" + os.path.basename(current_directory_name) + ".db",
         [query.query],
     )
 
 
-def agent_node(state, directory_name: str, output_dict: List[str]):
+def agent_node(state, directory_name: str, output_list: List[str]):
+    global current_directory_name
+    current_directory_name = directory_name
+
     llm = ChatOpenAI(
         api_key=api_key,
         model="gpt-4o-mini",
@@ -47,8 +48,8 @@ def agent_node(state, directory_name: str, output_dict: List[str]):
             MessagesPlaceholder(variable_name="messages"),
             (
                 "system",
-                "directory_name: {directory_name} "
-                "함수에 접근해서 파일 경로들을 리스트로 만들어주세요.",
+                "current directory name: {directory_name} "
+                "사용자에 요청에 따라서 디렉토리에서 파일을 검색하려고 합니다 쿼리를 문장으로 정리해주세요",
             ),
         ]
     ).partial(
@@ -58,7 +59,7 @@ def agent_node(state, directory_name: str, output_dict: List[str]):
     chain = query_chain | get_file_list
     res = chain.invoke(state)
     if res:
-        output_dict.extend(res)
+        output_list.extend(res)
         return {"messages": res}
     else:
         return {"messages": []}

@@ -15,6 +15,7 @@ from rag.vectorDb import (
 from rag.embedding import initialize_model
 from agent.graph import graph
 
+
 link_dir = None
 
 
@@ -30,28 +31,12 @@ def execute_command(command, root_dir):
 
     try:
         cmd_parts = command.strip().split()
-        if cmd_parts[0] == "mf":
-            # file_data = get_all_file_data(cmd_parts[1])
-            # print(file_data)
-
-            temp_dir = tempfile.TemporaryDirectory()
-            make_soft_links(
-                [
-                    "/Users/parksehwan/Documents/MAFM/mafm/shell.py",
-                    "/Users/parksehwan/Documents/MAFM/mafm/a.txt",
-                ],
-                temp_dir,
-            )
-            os.chdir(temp_dir.name)
-            link_dir = temp_dir
-            return
-
-        elif cmd_parts[0] == "mlink":
+        if cmd_parts[0] == "mlink":
             if len(cmd_parts) < 2:
                 print("mlink: missing arguments. Usage: mlink <query>")
                 return
 
-            prompt = cmd_parts[1]
+            prompt = " ".join(cmd_parts[1:])
             paths = graph(root_dir, prompt)
 
             # 임시 디렉토리 생성

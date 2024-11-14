@@ -4,9 +4,11 @@ import psutil
 
 # 모델을 전역 변수로 초기화하여 재사용
 model = None
-os.environ['TOKENIZERS_PARALLELISM'] = "false"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 
 def initialize_model():
+
     global model
     if model is None:
         try:
@@ -19,7 +21,8 @@ def initialize_model():
             # 모델 초기화
             model = SentenceTransformer(
                 # "dunzhang/stella_en_400M_v5",
-                "avsolatorio/GIST-small-Embedding-v0",
+                "avsolatorio/GIST-small-Embedding-v0",  # 33
+                # "hkunlp/instructor-base",  # 110
                 trust_remote_code=True,
                 device="cpu",
                 config_kwargs={
@@ -54,5 +57,5 @@ def embedding(queries):
     except MemoryError as me:
         print(f"MemoryError: {me}")
     except Exception as e:
-        print(f"embedding 중 오류 발생: {e}")
+        print(f"embedding 중 오z류 발생: {e}")
         return None

@@ -5,7 +5,7 @@ from typing import Sequence, TypedDict, Annotated, List
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, StateGraph, START
 from .agents import agent_node, supervisor_agent, analyst_agent
-from rag.sqlite import get_directories_by_depth
+from rag.sqlite import get_directory_structure
 
 
 class AgentState(TypedDict):
@@ -16,22 +16,21 @@ class AgentState(TypedDict):
 def graph(directory_path: str, prompt: str) -> List[str]:
     human_input = HumanMessage(content=prompt)
 
-    members = get_directories_by_depth(
-        1
-    )  # get_directories_by_depth 고쳐야함. 지금은 항상 filesystem.db 기준임
-    output_dict = []
-    print(members, human_input)
+    members = get_directory_structure()
+    output_list = []
+    print(members)
+    print(human_input)
     # graph 생성
     workflow = StateGraph(AgentState)
     supervisor_node = functools.partial(supervisor_agent, member_list=members)
     workflow.add_node("supervisor", supervisor_node)
     analyst_node = functools.partial(
-        analyst_agent, input_prompt=human_input.content, output_dict=output_dict
+        analyst_agent, input_prompt=human_input.content, output_list=output_list
     )
     workflow.add_node("analyst", analyst_node)
     for member in members:
         member_node = functools.partial(
-            agent_node, directory_name=member, output_dict=output_dict
+            agent_node, directory_name=member, output_list=output_list
         )
         workflow.add_node(member, member_node)
         workflow.add_edge(member, "supervisor")
@@ -42,11 +41,11 @@ def graph(directory_path: str, prompt: str) -> List[str]:
     workflow.add_edge("analyst", END)
     app = workflow.compile()
 
-    from IPython.display import Image, display
-
+    # from IPython.display import Image, display
     # png_data = app.get_graph().draw_mermaid_png()
     # with open("graph_image.png", "wb") as file:
     #     file.write(png_data)
+
     previous_output = None
     for s in app.stream(
         {"messages": [human_input]},
