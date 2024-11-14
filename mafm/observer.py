@@ -11,7 +11,7 @@ from rag.sqlite import (
     change_directory_path,
     change_file_path,
     delete_directory_and_subdirectories,
-    initialize_database
+    initialize_database,
 )
 from rag.embedding import embedding, initialize_model
 from rag.fileops import get_file_data
@@ -36,7 +36,7 @@ class FileEventHandler(FileSystemEventHandler):
 
     def is_ignored_file(self, path):
         """특정 패턴을 가진 파일을 무시하는 함수"""
-        ignored_patterns = ["db-journal",".db"]
+        ignored_patterns = ["db-journal", ".db"]
         return any(pattern in path for pattern in ignored_patterns)
 
     def on_deleted(self, event):
@@ -85,13 +85,20 @@ class FileEventHandler(FileSystemEventHandler):
 
     def on_moved(self, event):
         """파일 또는 디렉토리 이동 이벤트 처리 함수"""
-        if self.is_dot_file(event.src_path) or self.is_dot_file(event.dest_path) or self.is_ignored_file(event.src_path) or self.is_ignored_file(event.dest_path):
+        if (
+            self.is_dot_file(event.src_path)
+            or self.is_dot_file(event.dest_path)
+            or self.is_ignored_file(event.src_path)
+            or self.is_ignored_file(event.dest_path)
+        ):
             return  # 숨김 파일은 무시
 
         print("--moved--")
 
         if event.is_directory:
-            change_directory_path(event.src_path, event.dest_path, "filesystem.db")  # 디렉토리 경로 변경
+            change_directory_path(
+                event.src_path, event.dest_path, "filesystem.db"
+            )  # 디렉토리 경로 변경
             print(f"Moved directory: from {event.src_path} to {event.dest_path}")
         else:
             print(f"Moved file: from {event.src_path} to {event.dest_path}")
@@ -107,20 +114,27 @@ class FileEventHandler(FileSystemEventHandler):
         dirpath = os.path.dirname(absolute_file_path)
         dirname = os.path.basename(dirpath)
 
-
         if event.is_directory:
             print("created directory")
             try:
                 initialize_vector_db(dirpath + "/" + dirname + ".db")  # 벡터 DB 초기화
                 id = insert_file_info(absolute_file_path, 1, "filesystem.db")
-                insert_directory_structure(id, dirpath, os.path.dirname(dirpath), "filesystem.db")
+                insert_directory_structure(
+                    id, dirpath, os.path.dirname(dirpath), "filesystem.db"
+                )
             except Exception as e:
                 print(f"Error initializing vector DB for directory: {e}")
         else:
             print("created file")
-            insert_file_info(absolute_file_path, 0, "filesystem.db")  # 파일 정보 DB에 추가
+            insert_file_info(
+                absolute_file_path, 0, "filesystem.db"
+            )  # 파일 정보 DB에 추가
             file_chunks = get_file_data(absolute_file_path)
-            save(dirpath + "/" + dirname + ".db", get_id_by_path(absolute_file_path, "filesystem.db"), file_chunks[2:])
+            save(
+                dirpath + "/" + dirname + ".db",
+                get_id_by_path(absolute_file_path, "filesystem.db"),
+                file_chunks[2:],
+            )
             print(f"Created file: {event.src_path}")
 
     def move_file(self, file_src_path, file_dest_path):
@@ -134,10 +148,91 @@ class FileEventHandler(FileSystemEventHandler):
         change_file_path(file_src_path, file_dest_path, db_name)  # 파일 경로 업데이트
 
 
+# SQLite DB에 파일 및 디렉토리 데이터 삽입
+def start_command_c(root):
+    # 시작 시간 기록
+    start_time = time.time()
+
+    id = 0
+
+    # SQLite DB 연결 및 초기화
+    try:
+        initialize_database("filesystem.db")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        return
+
+    # root 자체는 os.walk(root)에 포함되지 않음 -> 따로 처리 필요
+    try:
+        initialize_vector_db(root + ".db")
+    except Exception as e:
+        print(f"Error initializing vector DB for root: {e}")
+        return
+
+    # print(root)
+    id = insert_file_info(root, 1, "filesystem.db")
+
+    # 루트의 부모 디렉토리 찾기
+    last_slash_index = root.rfind("/")
+    if last_slash_index != -1:
+        root_parent = root[:last_slash_index]
+
+    insert_directory_structure(id, root, root_parent, "filesystem.db")
+
+    # 디렉터리 재귀 탐색
+    for dirpath, dirnames, filenames in os.walk(root):
+        # 디렉터리 정보 삽입
+        for dirname in dirnames:
+            full_path = os.path.join(dirpath, dirname)
+            print(f"디렉토리 경로: {full_path}")
+            try:
+                initialize_vector_db(full_path + "/" + dirname + ".db")
+            except Exception as e:
+                print(f"Error initializing vector DB for directory: {e}")
+                continue
+
+            print(f"디렉토리 경로: {full_path}")
+            id = insert_file_info(full_path, 1, "filesystem.db")
+            insert_directory_structure(id, full_path, dirpath, "filesystem.db")
+
+        # 파일 정보 삽입 및 벡터 DB에 저장
+        for filename in filenames:
+            # 비밀 파일(파일 이름이 .으로 시작)과 .db 파일 제외
+            if filename.startswith(".") or filename.endswith(".db"):
+                continue
+
+            full_path = os.path.join(dirpath, filename)
+            print(f"Embedding 하는 파일의 절대 경로: {full_path}")
+
+            # 파일 정보 삽입
+            insert_file_info(full_path, 0, "filesystem.db")
+
+            file_chunks = get_file_data(full_path)
+
+            # 각 디렉토리의 벡터 DB에 해당 파일 내용을 저장
+            dirname = dirpath.split("/")[-1]
+            save(dirpath + "/" + dirname + ".db", id, file_chunks[2:])
+
+    # 종료 시간 기록
+    end_time = time.time()
+
+    # 걸린 시간 계산
+    elapsed_time = end_time - start_time
+    print(f"작업에 걸린 시간: {elapsed_time:.4f} 초")
+
+
 def start_watchdog(root_dir):
     """파일 시스템 감시 시작 함수"""
     initialize_model()  # 임베딩 모델 초기화
-    initialize_database("filesystem.db")  # 파일 시스템 DB 초기화
+    try:
+        # 해당 root 아래에 존재하는 모든 파일들을 탐색해서 sqlite db에 저장해야함.
+        # start_command_python(root_dir)
+        start_command_c(root_dir)
+        # get_file_data(root)
+    except IndexError:
+        print("start: missing argument")
+    except FileNotFoundError:
+        print(f"start: no such file or directory: {root_dir}")
 
     # 파일 이벤트 핸들러와 감시자 생성
     event_handler = FileEventHandler()

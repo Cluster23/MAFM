@@ -9,6 +9,7 @@ from langgraph.store.base import BaseStore
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.utils.function_calling import convert_to_openai_function
 from langchain_core.messages import HumanMessage
+import os
 
 from rag.vectorDb import search
 
@@ -26,8 +27,13 @@ def get_file_list(query: queryResponse) -> List[str]:
     """
     get file list from user input
     """
-    print(query)
-    return search(query.directory_name + ".db", [query.query])
+    print(
+        query.directory_name + "/" + os.path.basename(query.directory_name) + ".db",
+    )
+    return search(
+        query.directory_name + "/" + os.path.basename(query.directory_name) + ".db",
+        [query.query],
+    )
 
 
 def agent_node(state, directory_name: str, output_dict: List[str]):
@@ -51,7 +57,6 @@ def agent_node(state, directory_name: str, output_dict: List[str]):
     query_chain = prompt | llm.with_structured_output(queryResponse)
     chain = query_chain | get_file_list
     res = chain.invoke(state)
-    print("RES", res, "\n\n\n\n")
     if res:
         output_dict.extend(res)
         return {"messages": res}

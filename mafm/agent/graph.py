@@ -44,13 +44,13 @@ def graph(directory_path: str, prompt: str) -> List[str]:
 
     from IPython.display import Image, display
 
-    png_data = app.get_graph().draw_mermaid_png()
-    with open("graph_image.png", "wb") as file:
-        file.write(png_data)
+    # png_data = app.get_graph().draw_mermaid_png()
+    # with open("graph_image.png", "wb") as file:
+    #     file.write(png_data)
     previous_output = None
     for s in app.stream(
         {"messages": [human_input]},
-        {"recursion_limit": 10},
+        {"recursion_limit": 20},
     ):
         previous_output = s
         if "__end__" not in s:
