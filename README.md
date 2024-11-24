@@ -1,3 +1,12 @@
+
+<div align="center">
+
+# 🎉 서울시립대학교 컴퓨터과학부 프로젝트 공모전 [셈틀제] 3위 수상 🎉
+
+</div>
+
+<br>
+
 ## MAFM
 MAFM(Multi-Agent File Management)은 기존 파일 관리 시스템의 한계를 극복하고 보다 효율적인 파일 검색 기능을 제공하는 지능형 파일 관리 시스템이다. 
 
